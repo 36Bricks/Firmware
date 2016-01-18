@@ -1,7 +1,9 @@
 ## 36_Bricks - IOT building blocks
 
 36_Bricks is a blocks system allowing do build custom connected objects. Based on small low-cost independant bricks, create your own IOT device for any need : home automation and alarm, laboratory, smart garden, multimedia, indusrty...
+
 From power and sensors to RGB lights, from data collection to processing and control, there's a brick for any need, and everything is available through Wifi. 
+
 
 ## ESP8266 - NodeMCU LUA - ArduinoIDE
 
@@ -12,11 +14,17 @@ This gitlab project is the ESP8266 program, flashed on each brick using the Ardu
 ## Requirements
 
 Arduino IDE 1.6.4 or better : https://www.arduino.cc/en/Main/Software
+
 ESP8266 Board Package for Arduino IDE : https://github.com/esp8266/Arduino
+
 Adafruit DHT22 Arduino library : https://github.com/adafruit/DHT-sensor-library
+
 Adafruit NeoPixel Arduino library : https://github.com/adafruit/Adafruit_NeoPixel
+
 AltSoftSerial Library : https://github.com/PaulStoffregen/AltSoftSerial
+
 Arduino Client for MQTT : http://pubsubclient.knolleary.net/
+
 
 ## Installation
 Follow this guide to enable and setup ESP8266 in Arduino ide : https://learn.adafruit.com/adafruit-huzzah-esp8266-breakout/using-arduino-ide
@@ -25,6 +33,7 @@ Open the project with Arduino IDE, add all needed libraries using and flash it o
 
 ## Modules
 The firmware is devided into modules. Modules can be enabled and disabled according to your needs just before flashing it to the brick.
+
 
 Actual modules :
 ### ConfigFromWifi (mandatory)
