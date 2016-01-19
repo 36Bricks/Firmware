@@ -69,9 +69,12 @@ Drives two 220v relays using HTTP API
 #### Strip
 Drives an RGB LED Strip using HTTP API
 
+#### Motion
+Motion sensing using HC-SR501 Infrared PIR Motion Sensor, available on HTTP API and over MQTT
+
 
 ## Plans
-More firmware modules will come allowing to build new bricks : Doors, Plants, Movement, Gaz sensors, Physical command buttons, Thermostat, Energy monitoring, IP Camera ...
+More firmware modules will come allowing to build new bricks : Doors, Plants, Gaz sensors, Physical command buttons, Thermostat, Energy monitoring, IP Camera ...
 
 ## Author
 Alexandre Garcia - PsY4
