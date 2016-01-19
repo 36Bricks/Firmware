@@ -1,3 +1,9 @@
+/***
+ * TELEINFO_EDF : Module to receive values from domestic EDF electicity counter (France only)
+ */
+
+ // TODO : Full debug, not tested yet 
+ 
 #if defined(MODULE_TELEINFO_EDF)
 
   #if defined(OPTION_MQTT)

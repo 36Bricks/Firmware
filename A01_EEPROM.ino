@@ -1,3 +1,48 @@
+/***
+ * EEPROM : Functions to read and save configuration to EEPROM
+ */
+#include <EEPROM.h>
+
+int eepromSSIDOffset = 0;         // Eeprom offset of Wifi ssid setting
+int eepromSSIDValidOffset = 54;   // Eeprom offset of Wifi ssid validation string
+
+int eepromPASSOffset = 64;        // Eeprom offset of Wifi pass setting
+int eepromPASSValidOffset = 118;  // Eeprom offset of Wifi pass validation string
+
+int eepromNameOffset = 128;       // Eeprom offset of brick name setting
+int eepromNameValidOffset = 182;  // Eeprom offset of brick name validation string
+
+struct SaveSSID { char ssid[48]; }; bool ssidOK;
+struct SavePASS { char pass[48]; }; bool passOK;
+struct SaveName { char name[48]; }; bool nameOK;
+
+SaveSSID retreivedSSID;
+SavePASS retreivedPASS;
+SaveName retreivedName;
+
+#if defined(OPTION_MQTT)
+  int eepromMQTTservOffset = 192;       // Eeprom offset of MQTT serv setting
+  int eepromMQTTservValidOffset = 246;  // Eeprom offset of MQTT serv validation string
+  
+  int eepromMQTTportOffset = 256;       // Eeprom offset of MQTT port setting
+  int eepromMQTTportValidOffset = 310;  // Eeprom offset of MQTT port validation string
+  
+  struct SaveMQTTserv { char serv[48]; }; bool servOK;
+  struct SaveMQTTport { char port[10]; }; bool portOK;
+  
+  SaveMQTTserv retreivedMQTTserv;
+  SaveMQTTport retreivedMQTTport;
+#endif
+
+int eepromLength = 320;                 // Eeprom total used size
+
+struct SaveValid { char valid[5]; };
+const char* saveValid = "true";
+
+
+/***
+ * Writes Brick name, Wifi SSID and Wifi password to EEPROM
+ */
 void SetSSID_PASS_NAME(String ssid, String pass, String name) {
     SaveSSID newSSID;
     SavePASS newPASS;
@@ -28,6 +73,9 @@ void SetSSID_PASS_NAME(String ssid, String pass, String name) {
 }
 
 #if defined(OPTION_MQTT)
+/***
+ * Writes MQTT server and MQTT port to EEPROM
+ */
   void SetMQTT(String serv, String port) {
       SaveMQTTserv newServ;
       SaveMQTTport newPort;
@@ -56,16 +104,18 @@ void SetSSID_PASS_NAME(String ssid, String pass, String name) {
   void SetMQTTPort(String MQTTPort) { }
 #endif
 
+/***
+ * Read full configuration from EEPROM
+ */
 void ReadStoredConfig() {
   Logln("[NFO] Reading stored configuration");
   
   SaveValid SSIDValid, PASSValid, NameValid;
+  EEPROM.begin(eepromLength);                                 // -- Open EEPROM fs
   
-  EEPROM.begin(eepromLength); // -- Open EEPROM fs
-  
-  EEPROM.get(eepromSSIDValidOffset, SSIDValid ); // -- Read SSID validation string
+  EEPROM.get(eepromSSIDValidOffset, SSIDValid );              // -- Read SSID validation string
   if (strcmp(SSIDValid.valid, "true") == 0) {
-      EEPROM.get(eepromSSIDOffset, retreivedSSID ); // -- Read stored SSID
+      EEPROM.get(eepromSSIDOffset, retreivedSSID );           // -- Read stored SSID
       Logln("[NFO] Retreived SSID : " + String(retreivedSSID.ssid) );
       ssidOK = true;
   } else {
@@ -73,9 +123,9 @@ void ReadStoredConfig() {
       ssidOK = false;
   }
   
-  EEPROM.get(eepromPASSValidOffset, PASSValid ); // -- Read Pass validation string
+  EEPROM.get(eepromPASSValidOffset, PASSValid );              // -- Read Pass validation string
   if (strcmp(PASSValid.valid, "true") == 0) {
-      EEPROM.get(eepromPASSOffset, retreivedPASS ); // -- Read stored password
+      EEPROM.get(eepromPASSOffset, retreivedPASS );           // -- Read stored password
       Logln("[NFO] Retreived PASS : " + String(retreivedPASS.pass) );
       passOK = true;
   } else {
@@ -83,9 +133,9 @@ void ReadStoredConfig() {
       passOK = false;
   }
 
-  EEPROM.get(eepromNameValidOffset, NameValid ); // -- Read name validation string
+  EEPROM.get(eepromNameValidOffset, NameValid );              // -- Read name validation string
   if (strcmp(NameValid.valid, "true") == 0) {
-      EEPROM.get(eepromNameOffset, retreivedName ); // -- Read stored name
+      EEPROM.get(eepromNameOffset, retreivedName );           // -- Read stored name
       Logln("[NFO] Retreived Name : " + String(retreivedName.name));
       nameOK = true;
   } else {
@@ -97,9 +147,9 @@ void ReadStoredConfig() {
 #if defined(OPTION_MQTT)
   SaveValid MQTTservValid, MQTTportValid;
 
-  EEPROM.get(eepromMQTTservValidOffset, MQTTservValid ); // -- Read MQTT Server validation string
+  EEPROM.get(eepromMQTTservValidOffset, MQTTservValid );      // -- Read MQTT Server validation string
   if (strcmp(MQTTservValid.valid, "true") == 0) {
-      EEPROM.get(eepromMQTTservOffset, retreivedMQTTserv ); // -- Read stored server
+      EEPROM.get(eepromMQTTservOffset, retreivedMQTTserv );   // -- Read stored MQTT server
       Logln("[NFO] Retreived MQTTserv : " + String(retreivedMQTTserv.serv));
       servOK = true;
   } else {
@@ -107,9 +157,9 @@ void ReadStoredConfig() {
       servOK = false;
   }
 
-  EEPROM.get(eepromMQTTportValidOffset, MQTTportValid ); // -- Read MQTT Port validation string
+  EEPROM.get(eepromMQTTportValidOffset, MQTTportValid );      // -- Read MQTT Port validation string
   if (strcmp(MQTTportValid.valid, "true") == 0) {
-      EEPROM.get(eepromMQTTportOffset, retreivedMQTTport ); // -- Read stored port
+      EEPROM.get(eepromMQTTportOffset, retreivedMQTTport );   // -- Read stored MQTT port
       Logln("[NFO] Retreived MQTTport : " + String(retreivedMQTTport.port));
       portOK = true;
   } else {
@@ -118,7 +168,7 @@ void ReadStoredConfig() {
   }
 #endif
 
-  EEPROM.end(); // -- Close EEPROM fs
+  EEPROM.end();                                               // -- Close EEPROM fs
 
 }
 

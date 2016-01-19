@@ -1,31 +1,49 @@
+/**
+ * STRIP : Drives a non-adressable RGB Led Strip through an RGB driver module
+ */
+ // TODO : HTTP API endpoint to fade ON/OFF
+ // TODO : HTTP API endpoint to flash a color (alarm)
+ 
 #if defined(MODULE_STRIP)
   #include "RGBdriver.h"
   
-  #define STRIP_CLK D7     
-  #define STRIP_DIO D6
-  #define STRIP_INTERVAL_MS 12
+  #define STRIP_CLK D7              // CLK pin
+  #define STRIP_DIO D6              // DIO Pin
+  #define STRIP_INTERVAL_MS 12      // RGB Strip loop interval
 
   RGBdriver stripDriver(STRIP_CLK,STRIP_DIO);
-  long stripLastUpdt = 0;
+  long stripRainbowLastUpdt = 0;
   
+  int stripRainbowLoopIndex=0;
+  bool stripRainbowLoopEnabled = true;
+  
+  /***
+   * Strip setup : declare HTTP API endpoints
+   */
   void stripSetup() {
      Logln("[NFO] RGB Strip initialization");
-     server.on("/strip/hue", stripSetColor);
-     server.on("/strip/rainbow/on", stripEnableRainbow);
-     server.on("/strip/rainbow/off", stripDisableRainbow);
-    
+     server.on("/strip/hue", stripSetColorAPI);
+     server.on("/strip/rainbow/on", stripEnableRainbowAPI);
+     server.on("/strip/rainbow/off", stripDisableRainbowAPI);
   }
 
-  int stripLoopIndex=0;
-  bool stripLoopEnabled = true;
-  
+  /***
+   * Strip main loop
+   */
   void stripLoop() {
-    if (stripLoopEnabled) {
+    stripRainbowLoop();
+  }
+  
+  /***
+   * Strip rainbow loop : loops through colors 
+   */
+  void stripRainbowLoop() {
+    if (stripRainbowLoopEnabled) {
         long now = millis();
-        if (now - stripLastUpdt > STRIP_INTERVAL_MS) {
+        if (now - stripRainbowLastUpdt > STRIP_INTERVAL_MS) {
             stripDriver.begin();
-            stripLastUpdt = now; 
-            int WheelPos = 255 - stripLoopIndex;
+            stripRainbowLastUpdt = now; 
+            int WheelPos = 255 - stripRainbowLoopIndex;
             if(WheelPos < 85) {
               stripDriver.SetColor(255 - WheelPos * 3, 0, WheelPos * 3);
             } else if(WheelPos < 170) {
@@ -35,25 +53,33 @@
               WheelPos -= 170;
               stripDriver.SetColor(WheelPos * 3, 255 - WheelPos * 3, 0);
             }
-            stripLoopIndex++;
-            if (stripLoopIndex>=256) stripLoopIndex=0;
+            stripRainbowLoopIndex++;
+            if (stripRainbowLoopIndex>=256) stripRainbowLoopIndex=0;
             stripDriver.end();
-    
         }
     }
   }
   
-  void stripEnableRainbow() {
-    stripLoopEnabled = true;
+   /***
+   * HTTP JSON API to enable rainbow loop 
+   */
+  void stripEnableRainbowAPI() {
+    stripRainbowLoopEnabled = true;
     server.send(200, "application/json", ReturnOK);
   }
   
-  void stripDisableRainbow() {
-    stripLoopEnabled = false;
+   /***
+   * HTTP JSON API to disable rainbow loop 
+   */
+  void stripDisableRainbowAPI() {
+    stripRainbowLoopEnabled = false;
     server.send(200, "application/json", ReturnOK);
   }
   
-  void stripSetColor() {
+   /***
+   * HTTP JSON API to set a color
+   */
+  void stripSetColorAPI() {
     String newColor = server.arg("color");
     newColor.replace("#","");
     
@@ -62,7 +88,7 @@
     long green = number >> 8 & 0xFF;
     long blue = number & 0xFF; 
     
-    stripLoopEnabled = false;
+    stripRainbowLoopEnabled = false;
     
     stripDriver.begin();
     stripDriver.SetColor(red, green, blue);

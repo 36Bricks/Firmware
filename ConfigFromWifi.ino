@@ -1,35 +1,39 @@
-//-----------------------------------------------------------
-//--------------- CONFIGURATION PAR WIFI --------------------
-//-----------------------------------------------------------
-//-- Gestion de la configuration du module par le wifi.    --
-//-----------------------------------------------------------
-//-- setupWiFiAP() - Démarre un AP Wifi si pas connecté à  --
-//-- un Wifi (Premier démarrage ou WIFI injoignable.       --
-//-----------------------------------------------------------
-//-- WifiSetupPage() - Sert la page de config Wifi et MQTT --
-//-----------------------------------------------------------
-//-- SaveWifiSetup() - Retour du form de config, enregistr --
-//-- ement de la config en EEPROM                          --
-//-----------------------------------------------------------
-// TODO : Enlever le mot de passe au AP                    --
-//-----------------------------------------------------------
+/***
+ *  ConfigFromWifi : Manages configuration page through wifi.
+ *  
+ *  Like Chromecast, if there is no Wifi configuration defined
+ *  (or if it can't connect to the defined Wifi SSID), it creates
+ *  its own Wifi access point to allow easy configuration.
+ *  
+ *  Config web page is always available, even when not on AP mode. 
+ */
 
-const char WiFiAPPSK[] = "sparkfun";
+// TODO : Add reset button on the 'Thank You' page
+// TODO : Add a switch to enable/disable MQTT option
+// TODO : Add NTP and timezone configuration
 
+const char WiFiAPPSK[] = "troissix";            // TODO : remove AP password
+
+/**
+ * ConfigFromWifi setup : declare HTTP API endpoints
+ */
 void setupConfigFromWifi() {
-  server.on("/setup", WifiSetupPage);
-  server.on("/saveCFG", SaveWifiSetup);
-  server.on("/reset", []() {
+  server.on("/setup", WifiSetupPage);                     // Setup web page
+  server.on("/saveCFG", SaveWifiSetup);                   // Setup form destination
+  server.on("/reset", []() {                              // Resets the brick
     server.send ( 200, "text/plain", "Resetting..." );
     ESP.restart();
   });
-  
 }
 
+/**
+ * Setups a Wifi acces point
+ */
 void setupWiFiAP() {
   Logln("[NFO] Starting WIFI Acces Point !");
   WiFi.mode(WIFI_AP);
 
+  // Creates AP name using brick type and mac address. ie: "36Brick MultiSensor 36A36A"
   uint8_t mac[WL_MAC_ADDR_LENGTH];
   WiFi.softAPmacAddress(mac);
   String macID = String(mac[WL_MAC_ADDR_LENGTH - 3], HEX) +
@@ -37,7 +41,7 @@ void setupWiFiAP() {
                  String(mac[WL_MAC_ADDR_LENGTH - 1], HEX);
   macID.toUpperCase();
   
-  String AP_NameString = "36Brick ";  
+  String AP_NameString = "36Brick ";
   AP_NameString += BRICK_TYPE;
   AP_NameString += " " + macID;
   
@@ -47,23 +51,25 @@ void setupWiFiAP() {
     AP_NameChar[i] = AP_NameString.charAt(i);
   
   Logln("[NFO] AP : " + AP_NameString);
-  WiFi.softAP(AP_NameChar, WiFiAPPSK);
+  WiFi.softAP(AP_NameChar, WiFiAPPSK);      // Starts the Wifi AP
 
-  server.begin();
+  server.begin();                           // Starts the server to handle HTTP API
   yield();
-  delay(2000);
+  delay(2000);                              // Waits AP to fully start
   yield();
   Serial.print("[NFO] IP : ");
   Serial.println(WiFi.softAPIP());
 }
 
+/**
+ * Serves the setup page
+ */
 void WifiSetupPage() {
     Logln("[NFO] Served setup page");
-    int n = WiFi.scanNetworks();
-      
-    String SetupPage = ConfigPage;
+    String SetupPage = ConfigPage;      // Setup page template
 
-    // Fill select with networks
+    // Fill the select box with available networks
+    int n = WiFi.scanNetworks();        // Scans networks
     String opt = "";
     for (int i = 0; i < n; ++i) {
         opt += "<option value='";
@@ -77,43 +83,45 @@ void WifiSetupPage() {
         opt += "</option>";
         yield();
     }
-    SetupPage.replace("%%TYPE%%",BRICK_TYPE);
-    SetupPage.replace("%%SSID%%",opt);
-    SetupPage.replace("%%PASS%%",retreivedPASS.pass);
-    SetupPage.replace("%%NAME%%",retreivedName.name);
+    SetupPage.replace("%%TYPE%%",BRICK_TYPE);             // Replace brick type in template
+    SetupPage.replace("%%SSID%%",opt);                    // Replace network list in template
+    SetupPage.replace("%%PASS%%",retreivedPASS.pass);     // Replace Wifi password in template
+    SetupPage.replace("%%NAME%%",retreivedName.name);     // Replace brick name in template
   #if defined(OPTION_MQTT)
-    SetupPage.replace("%%MQTT_SERV%%",retreivedMQTTserv.serv);
-    SetupPage.replace("%%MQTT_PORT%%",String(retreivedMQTTport.port));
+    SetupPage.replace("%%MQTT_SERV%%",retreivedMQTTserv.serv);          // Replace MQTT server adress in template
+    SetupPage.replace("%%MQTT_PORT%%",String(retreivedMQTTport.port));  // Replace MQTT server port in template
   #endif
-    server.send(200, "text/html", SetupPage);
+    server.send(200, "text/html", SetupPage);             // Serv the page as html
 }
 
-
+/**
+ * Setup page Form destination : saves the config
+ */
 void SaveWifiSetup() {
   Logln("[NFO] Setup form submitted");
   
-  String HTMLoutput = ThxPage;
-  HTMLoutput.replace("%%TYPE%%",BRICK_TYPE);
+  String HTMLoutput = ThxPage;                  // Thank you page template
+  HTMLoutput.replace("%%TYPE%%",BRICK_TYPE);    // Replace brick type in template
 
-  String newName = server.arg("name");
-  String newSSID = server.arg("ssid");
-  String newPASS = server.arg("pass");
-  String newMQTTServ = server.arg("mqttserv");
-  String newMQTTPort = server.arg("mqttport");
+  String newName = server.arg("name");          // Parse brick name
+  String newSSID = server.arg("ssid");          // Parse wifi ssid
+  String newPASS = server.arg("pass");          // Parse wifi password
+  String newMQTTServ = server.arg("mqttserv");  // Parse MQTT server adress
+  String newMQTTPort = server.arg("mqttport");  // Parse MQTT server port
   yield();  
 
   Logln("[EVT] New Name defined : "+newName);
   Logln("[EVT] New SSID defined : "+newSSID);
   Logln("[EVT] New Password defined : "+newPASS);
-  SetSSID_PASS_NAME(newSSID, newPASS, newName); yield();
+  SetSSID_PASS_NAME(newSSID, newPASS, newName); yield();    // Saves name, wifi ssid and wifi pass to eeprom
   
 #if defined(OPTION_MQTT)
   Logln("[EVT] New MQTT Server defined : "+newMQTTServ);
   Logln("[EVT] New MQTT Port defined : "+newMQTTPort);
-  SetMQTT(newMQTTServ, newMQTTPort);yield();
+  SetMQTT(newMQTTServ, newMQTTPort);yield();                // Saves MQTT settings to eeprom
 #endif  
   
-  server.send(200, "text/html", HTMLoutput);
+  server.send(200, "text/html", HTMLoutput);    // Serves the thank you page as html
 }
 
 

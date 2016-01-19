@@ -1,15 +1,25 @@
+/***
+ * OUTPUTS : Digital outputs modules. Used to control relays.
+ */
+ 
+// TODO : HTTP API endpoints for timed and sequenced outputs modes
 
 #if defined(MODULE_OUTPUTS)
-  #define OUTPUT_1 D0
-  #define OUTPUT_2 D1
 
+  #define OUTPUT_1 D0     // Output 1 pin
+  #define OUTPUT_2 D1     // Output 2 pin
+  
   #if defined(OPTION_MQTT)
     #define topicOutput1 "outputs/1"
     #define topicOutput2 "outputs/2"
   #endif 
   
-  int led0=0, led1=0;
+  bool output1 = false;
+  bool output2 = false;
 
+  /***
+   * Outputs setup : set pins modes, and declare HTTP API endpoints
+   */
   void OutputSetup() {
     Logln("[NFO] Outputs initialization");
     pinMode(OUTPUT_1, OUTPUT); DesactivateOutput1(); // LED 0
@@ -22,46 +32,61 @@
     server.on("/out/status", OutputStatus);
   }
 
+  /***
+   * HTTP JSON API to enable output 1 
+   */
   void ActivateOutput1() {
       digitalWrite(OUTPUT_1, HIGH); 
-      led0 = 1;
+      output1 = true;
       #if defined(OPTION_MQTT)
         MQTTpublish(topicOutput1, "1");
       #endif
       server.send(200, "application/json", ReturnOK);
   }
 
+  /***
+   * HTTP JSON API to disable output 1 
+   */
   void DesactivateOutput1() {
       digitalWrite(OUTPUT_1, LOW); 
-      led0 = 0;
+      output1 = false;
       #if defined(OPTION_MQTT)
         MQTTpublish(topicOutput1, "0");
       #endif
       server.send(200, "application/json", ReturnOK);
   }
 
+  /***
+   * HTTP JSON API to enable output 2 
+   */
   void ActivateOutput2() {
       digitalWrite(OUTPUT_2, HIGH); 
-      led1 = 1;
+      output2 = true;
       #if defined(OPTION_MQTT)
         MQTTpublish(topicOutput2, "1");
       #endif
       server.send(200, "application/json", ReturnOK);
   }
 
+  /***
+   * HTTP JSON API to disable output 2 
+   */
   void DesactivateOutput2() {
       digitalWrite(OUTPUT_2, LOW); 
-      led1 = 0;
+      output2 = false;
       #if defined(OPTION_MQTT)
         MQTTpublish(topicOutput2, "0");
       #endif
       server.send(200, "application/json", ReturnOK);
   }
 
+  /***
+   * HTTP JSON API to send outputs statuses
+   */
   void OutputStatus() {
       String JSONoutput = "{ ";
-      JSONoutput += "\"out0\": \""; JSONoutput+=(led0 ? "1" : "0"); JSONoutput+="\", ";
-      JSONoutput += "\"out1\": \""; JSONoutput+=(led1 ? "1" : "0"); JSONoutput+="\" ";
+      JSONoutput += "\"out0\": \""; JSONoutput+=(output1 ? "1" : "0"); JSONoutput+="\", ";
+      JSONoutput += "\"out1\": \""; JSONoutput+=(output2 ? "1" : "0"); JSONoutput+="\" ";
       JSONoutput += "}\r\n";
       server.send(200, "application/json", JSONoutput);
   }

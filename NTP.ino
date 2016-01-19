@@ -1,19 +1,29 @@
+/***
+ * NTP : Option to sync ESP time online
+ * /!\ TimeLib automatically manages NTP sync each time it's necessary (tested @ 5 minutes)
+ */
+
+// TODO : HTTP API Endpoint to force sync with remote NTP server
+
 #if defined(OPTION_NTP) 
 
   #include <TimeLib.h> 
   #include <WiFiUdp.h>
 
-  #define NTP_SERVER_NAME "fr.pool.ntp.org" 
-  #define NTP_PACKET_SIZE 48  // NTP time stamp is in the first 48 bytes of the message
-  #define NTP_INTERVAL_MS 500 // 0.5 seconds
-  #define timeZone 1          // Central European Time
-  #define UDT_LOCAL_PORT 2390     
+  #define NTP_SERVER_NAME "fr.pool.ntp.org"   // NTP server (or pool) adress
+  #define NTP_PACKET_SIZE 48                  // NTP time stamp is in the first 48 bytes of the message
+  #define NTP_INTERVAL_MS 500                 // Local time update interval : 0.5 seconds
+  #define NTP_TIME_ZONE 1                     // Central European Time
+  #define UDT_LOCAL_PORT 2390                 // Local UDP port
 
   IPAddress timeServerIP;
-  byte packetBuffer[ NTP_PACKET_SIZE]; //buffer to hold incoming and outgoing packets
+  byte packetBuffer[NTP_PACKET_SIZE];        //buffer to hold incoming and outgoing packets
   elapsedMillis ntpUpdateTimeElapsed;
   WiFiUDP udp;
   
+  /***
+   * NTP option setup : starts UDP communication and define Sync provider
+   */
   void ntpSetup() {
     Logln("[NFO] NTP initialization");
     if (wifiOK) { 
@@ -22,6 +32,9 @@
     }
   }
 
+  /***
+   * NTP main loop : updates local time on defined interval
+   */
   void ntpLoop() {
     if (wifiOK) { 
       if (ntpUpdateTimeElapsed > NTP_INTERVAL_MS)  {       
@@ -31,53 +44,68 @@
     }
   }
 
+  /***
+   * Returns date and time as a formated string
+   */
   String DateTime() {
-    String tmp = String(hour()) + printDigits(minute());
-    tmp += printDigits(second()) + " ";
-    tmp += String(day())+"/"+String(month())+"/"+String(year()); 
+    String tmp = String(hour()) + ":" + printDigits(minute()) + ":" + printDigits(second()) + " " + printDigits(day()) + "/" + printDigits(month()) + "/" + String(year()); 
     return tmp;
   }
+
+  /***
+   * Returns date as a formated string
+   */
   String GetDate() {
     String tmp = printDigits(day())+"/"+printDigits(month())+"/"+String(year()); 
     return tmp;
   }
+  
+  /***
+   * Returns time as a formated string
+   */
   String GetTime() {
     String tmp = String(hour()) + printDigits(minute());
     tmp += printDigits(second()) ; 
     return tmp;
   }
 
+  /***
+   * Returns a number with leading zero
+   */
   String printDigits(int digits){
-    // utility for digital clock display: prints preceding colon and leading 0
-    return String(":") + String(((digits < 10)?"0":"")) + String(digits);
+    return String(((digits < 10)?"0":"")) + String(digits);
   }
 
-
-
+  /***
+   * NTP Sync provider
+   */
   time_t getNtpTime() {
     Logln("[NFO] NTP sync time ...");
-    while (udp.parsePacket() > 0) ; // discard any previously received packets
-    WiFi.hostByName(NTP_SERVER_NAME, timeServerIP);  //get a random server from the pool
-    sendNTPpacket(timeServerIP); // send an NTP packet to a time server
+    while (udp.parsePacket() > 0) ;                       // discard any previously received packets
+    WiFi.hostByName(NTP_SERVER_NAME, timeServerIP);       // get a server from the pool
+    sendNTPpacket(timeServerIP);                          // send an NTP packet to the time server
     uint32_t beginWait = millis();
-    while (millis() - beginWait < 15000) {
+    while (millis() - beginWait < 15000) {                // waits for the answer
       int size = udp.parsePacket();
       if (size >= NTP_PACKET_SIZE) {
-        udp.read(packetBuffer, NTP_PACKET_SIZE);  // read packet into the buffer
+        udp.read(packetBuffer, NTP_PACKET_SIZE);          // read packet into the buffer
         unsigned long secsSince1900;
         // convert four bytes starting at location 40 to a long integer
         secsSince1900 =  (unsigned long)packetBuffer[40] << 24;
         secsSince1900 |= (unsigned long)packetBuffer[41] << 16;
         secsSince1900 |= (unsigned long)packetBuffer[42] << 8;
         secsSince1900 |= (unsigned long)packetBuffer[43];
-        return secsSince1900 - 2208988800UL + timeZone * SECS_PER_HOUR;
+        return secsSince1900 - 2208988800UL + NTP_TIME_ZONE * SECS_PER_HOUR;
       }
+      yield();
     }
     Logln("[NFO] NTP sync time ERROR :'(");
     return 0;
   }
 
-  // send an NTP request to the time server at the given address
+  /***
+   * send an NTP request to the time server at the given address
+   */
   unsigned long sendNTPpacket(IPAddress& address) {
     memset(packetBuffer, 0, NTP_PACKET_SIZE);
     

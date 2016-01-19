@@ -1,10 +1,14 @@
+/***
+ * PHOTO LEVEL : Light sensor module, using a photoresistor
+ */
+ 
 #if defined(MODULE_PHOTO)
 
-  #define PHOTOSENSOR_PIN A0
-  #define PHOTOSENSOR_INTERVAL_MS 1000
+  #define PHOTOSENSOR_PIN A0              // Photosensor input pin
+  #define PHOTOSENSOR_INTERVAL_MS 1000    // Photosensor update interval
   
   #if defined(OPTION_MQTT)
-    #define topicLight "sensor/light"
+    #define topicLight    "sensor/light"
     #define topicLightPrc "sensor/light_prc"
   #endif
 
@@ -12,11 +16,17 @@
   int lightLevelPrc;
   long PhotoLastMsg = 0;
   
+  /***
+   * Photosensor setup : declare HTTP API endpoints
+   */
   void PhotoSetup() {
     Logln("[NFO] PhotoSensor initialization");
-    server.on("/light/level", PhotoAPI);
+    server.on("/light/level", PhotoLevelAPI);
   }
   
+  /***
+   * Photosensor main loop : sample light level and publish on MQTT topics
+   */
   void PhotoLoop() {
     long now = millis();
     if (now - PhotoLastMsg > PHOTOSENSOR_INTERVAL_MS) {
@@ -33,7 +43,10 @@
     }
   }
   
-  void PhotoAPI() {
+  /***
+   * HTTP JSON API : answer with light level (raw and percent)
+   */
+  void PhotoLevelAPI() {
     String JSONoutput = "";
     JSONoutput += "{ \"LightLevel\": \"";
     JSONoutput += lightLevel;

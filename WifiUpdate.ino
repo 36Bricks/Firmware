@@ -1,11 +1,16 @@
+/**
+ * Manages the firmware update through wifi
+ */
 void wifiUpdateSetup() {
 
+    // Firmware update web page
     server.on("/firmware", HTTP_GET, [](){
       server.sendHeader("Connection", "close");
       server.sendHeader("Access-Control-Allow-Origin", "*");
       server.send(200, "text/html", serverUpdate);
     });
     
+    // Firmware update file upload (form destination)
     server.onFileUpload([](){
       if(server.uri() != "/update") return;
       HTTPUpload& upload = server.upload();
@@ -33,6 +38,7 @@ void wifiUpdateSetup() {
       yield();
     });
     
+    // Firmware update form destination (processed after file upload)
     server.on("/update", HTTP_POST, [](){
       server.sendHeader("Connection", "close");
       server.sendHeader("Access-Control-Allow-Origin", "*");
