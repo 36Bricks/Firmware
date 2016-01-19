@@ -1,6 +1,6 @@
 ## 36_Bricks - IOT building blocks
 
-36_Bricks is a blocks system allowing do build custom connected objects. Based on small low-cost independant bricks, create your own IOT device for any need : home automation and alarm, laboratory, smart garden, multimedia, indusrty...
+36_Bricks is a blocks system allowing do build custom connected objects. Based on small low-cost independant bricks, create your own IOT device for any need : home automation and alarm, laboratory, smart garden, multimedia, industry...
 
 From power and sensors to RGB lights, from data collection to processing and control, there's a brick for any need, and everything is available through Wifi. 
 
