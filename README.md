@@ -1,6 +1,6 @@
 ## 36_Bricks - IOT building blocks
 
-36_Bricks is a blocks system allowing do build custom connected objects. Based on small low-cost independant bricks, create your own IOT device for any need : home automation and alarm, laboratory, smart garden, multimedia, industry...
+36_Bricks is a blocks system allowing to build custom connected objects. Based on small low-cost independant bricks, create your own IOT device for any need : home automation and alarm, laboratory, smart garden, multimedia, industry...
 
 From power and sensors to RGB lights, from data collection to processing and control, there's a brick for any need, and everything is available through Wifi. 
 
@@ -9,7 +9,7 @@ From power and sensors to RGB lights, from data collection to processing and con
 
 The main part of each brick is an ESP8266 ESP12-E. It handles its 10 GPIO and WIFI to connect bricks to the world.
 
-This gitlab project is the ESP8266 program, flashed on each brick using the Arduino IDE.
+This git project is the embedded software (firmware) for ESP8266, flashed on each brick using the Arduino IDE.
 
 ## Requirements
 
@@ -29,53 +29,53 @@ Arduino Client for MQTT : http://pubsubclient.knolleary.net/
 ## Installation
 Follow this guide to enable and setup ESP8266 in Arduino ide : https://learn.adafruit.com/adafruit-huzzah-esp8266-breakout/using-arduino-ide
 
-Open the project with Arduino IDE, add all needed libraries using and flash it on the ESP.
+Open the project with Arduino IDE, add all needed libraries using "Sketch -> Include library -> Manage libraries ..." and flash it on the ESP.
 
 ## Modules
 The firmware is devided into modules. Modules can be enabled and disabled according to your needs just before flashing it to the brick.
 
 
 Actual modules :
-### ConfigFromWifi (mandatory)
-Chromecast-like configuration over Wifi. For first-time anf failover Wifi configuration, the module creates it own Wifi AP, and serves an HTML configuration page to perform full configuration of the brick : Brick name, Wifi SSID and password, MQTT server and port (if MQTT module enabled)
+#### ConfigFromWifi (mandatory)
+Chromecast-like configuration over Wifi. For first-time and failover Wifi configuration, the module creates its own Wifi AP, and serves an HTML configuration page to perform full configuration of the brick : Brick name, Wifi SSID and password, MQTT server and port (if MQTT module enabled)
 
-### WifiUpdate (mandatory)
+#### WifiUpdate (mandatory)
 Allows to flash new firmware through WiFi.
 
-### EEPROM (mandatory)
+#### EEPROM (mandatory)
 Manages the storage of brick configuration on embedded EEPROM to save them upon reboot and long-term power off.
 
-### NTP
+#### NTP
 Time sync of the brick
 
-### MQTT
+#### MQTT
 Allows posting to any MQTT broker
 
-### DHT22
+#### DHT22
 Temperature and Humidity sensor, available on HTTP API and over MQTT
 
-### PhotoLevel
+#### PhotoLevel
 Light level sensor, available on HTTP API and over MQTT
 
-### TeleInfoEDF
+#### TeleInfoEDF
 Gather informations from domestic EDF electric counter, available on HTTP API and over MQTT
 
-### NeoPixels
+#### NeoPixels
 Drives up to 1024 adressable RGB Leds using HTTP API
 
-### OLED
+#### OLED
 Drives a small 128x64px OLED screen (only for debug atm)
 
-### Outputs
+#### Outputs
 Drives two 220v relays using HTTP API
 
-### Strip
+#### Strip
 Drives an RGB LED Strip using HTTP API
 
 
 ## Plans
 
-More firmware modules will come allowing to build new bricks : Doors, Pants, Movement, Gaz sensors, Physical command buttons, Thermostat, Energy monitoring, IP Camera ...
+More firmware modules will come allowing to build new bricks : Doors, Plants, Movement, Gaz sensors, Physical command buttons, Thermostat, Energy monitoring, IP Camera ...
 
 ## Author
 
