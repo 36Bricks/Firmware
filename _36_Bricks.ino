@@ -4,14 +4,15 @@
 //-----------------------------------------------------------
 //-- Enable or disable some modules and option             --
 //-----------------------------------------------------------
-#define MODULE_OUTPUTS
-#define MODULE_TELEINFO_EDF
-#define MODULE_OLED
-#define MODULE_PHOTO
-#define MODULE_DHT22
-#define MODULE_NEOPIXELS
-#define MODULE_STRIP
+//#define MODULE_OUTPUTS
+//#define MODULE_TELEINFO_EDF
+//#define MODULE_OLED
+//#define MODULE_PHOTO
+//#define MODULE_DHT22
+//#define MODULE_NEOPIXELS
+//#define MODULE_STRIP
 //#define MODULE_SWITCH_RETROFIT
+#define MODULE_MOTION
 
 #define OPTION_MQTT
 #define OPTION_NTP
@@ -79,6 +80,10 @@ void setup() {
     PhotoSetup();
   #endif
 
+  #if defined(MODULE_MOTION)       // Motion sensor module setup
+    MotionSetup();
+  #endif
+
   #if defined(MODULE_DHT22)       // DHT22 module setup
     Dht22Setup();
   #endif
@@ -127,6 +132,10 @@ void loop() {
   
   #if defined(MODULE_PHOTO)     // Photosensor module loop
     PhotoLoop();
+  #endif
+
+  #if defined(MODULE_MOTION)       // Motion sensor module loop
+    MotionLoop();
   #endif
 
   #if defined(MODULE_DHT22)     // DHT22 module loop
