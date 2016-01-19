@@ -11,10 +11,15 @@ This git project is the embedded software (firmware) for ESP8266, flashed on eac
 
 ## Requirements
 Arduino IDE 1.6.4 or better : https://www.arduino.cc/en/Main/Software
+
 ESP8266 Board Package for Arduino IDE : https://github.com/esp8266/Arduino
+
 Adafruit DHT22 Arduino library : https://github.com/adafruit/DHT-sensor-library
+
 Adafruit NeoPixel Arduino library : https://github.com/adafruit/Adafruit_NeoPixel
+
 AltSoftSerial Library : https://github.com/PaulStoffregen/AltSoftSerial
+
 Arduino Client for MQTT : http://pubsubclient.knolleary.net/
 
 ## Installation
@@ -75,8 +80,13 @@ Alexandre Garcia - PsY4
 This code is released under the MIT License.
 
 Arduino IDE is developed and maintained by the Arduino team. The IDE is licensed under GPL.
+
 ESP8266 core files are licensed under LGPL.
+
 ESP8266 core includes an xtensa gcc toolchain, which is also under GPL.
+
 Adafruit DHT22 and NeoPixels Arduino libraries are developed and maintained by the Adafuit team.
+
 AltSoftSerial Arduino library is developed and maintained by Paul Stoffregen
+
 Arduino Client for MQTT Arduino library is developed and maintained by Nick O'Leary, and licensed under the MIT License
