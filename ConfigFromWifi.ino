@@ -8,7 +8,6 @@
  *  Config web page is always available, even when not on AP mode. 
  */
 
-// TODO : Add reset button on the 'Thank You' page
 // TODO : Add a switch to enable/disable MQTT option
 // TODO : Add NTP and timezone configuration
 
