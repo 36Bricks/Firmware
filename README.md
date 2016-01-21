@@ -29,7 +29,7 @@ First rename the source folder to "_36_Bricks" as Arduino IDE need it to find th
 
 Open the project with Arduino IDE, add all needed libraries using "Sketch -> Include library -> Manage libraries ..." and flash it on the ESP.
 
-## Modules
+## Firmware modules
 The firmware is devided into modules. Modules can be enabled and disabled according to your needs just before flashing it to the brick.
 
 Actual modules :
@@ -71,6 +71,9 @@ Drives an RGB LED Strip using HTTP API
 
 #### Motion
 Motion sensing using HC-SR501 Infrared PIR Motion Sensor, available on HTTP API and over MQTT
+
+#### Current
+Current sensing using ACS712 current sensor, available on HTTP API and over MQTT
 
 
 ## Plans

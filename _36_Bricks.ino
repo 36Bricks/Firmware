@@ -12,7 +12,8 @@
 //#define MODULE_NEOPIXELS
 //#define MODULE_STRIP
 //#define MODULE_SWITCH_RETROFIT
-#define MODULE_MOTION
+//#define MODULE_MOTION
+#define MODULE_CURRENT
 
 #define OPTION_MQTT
 #define OPTION_NTP
@@ -80,6 +81,10 @@ void setup() {
     PhotoSetup();
   #endif
 
+  #if defined(MODULE_CURRENT)       // Photosensor module setup
+    currentSetup();
+  #endif
+
   #if defined(MODULE_MOTION)       // Motion sensor module setup
     MotionSetup();
   #endif
@@ -132,6 +137,10 @@ void loop() {
   
   #if defined(MODULE_PHOTO)     // Photosensor module loop
     PhotoLoop();
+  #endif
+
+  #if defined(MODULE_CURRENT)       // Photosensor module setup
+    currentLoop();
   #endif
 
   #if defined(MODULE_MOTION)       // Motion sensor module loop
