@@ -16,6 +16,8 @@
   
   int stripRainbowLoopIndex=0;
   bool stripRainbowLoopEnabled = true;
+
+  long stripRed, stripGreen, stripBlue;
   
   /***
    * Strip setup : declare HTTP API endpoints
@@ -41,21 +43,28 @@
     if (stripRainbowLoopEnabled) {
         long now = millis();
         if (now - stripRainbowLastUpdt > STRIP_INTERVAL_MS) {
-            stripDriver.begin();
             stripRainbowLastUpdt = now; 
             int WheelPos = 255 - stripRainbowLoopIndex;
             if(WheelPos < 85) {
-              stripDriver.SetColor(255 - WheelPos * 3, 0, WheelPos * 3);
+              stripRed = 255 - WheelPos * 3;
+              stripGreen = 0;
+              stripBlue = WheelPos * 3; 
             } else if(WheelPos < 170) {
               WheelPos -= 85;
-              stripDriver.SetColor(0, WheelPos * 3, 255 - WheelPos * 3);
+              stripRed = 0;
+              stripGreen = WheelPos * 3;
+              stripBlue = 255 - WheelPos * 3; 
             } else {
               WheelPos -= 170;
-              stripDriver.SetColor(WheelPos * 3, 255 - WheelPos * 3, 0);
+              stripRed = WheelPos * 3;
+              stripGreen = 255 - WheelPos * 3;
+              stripBlue = 0; 
             }
+            stripDriver.begin();
+            stripDriver.SetColor(stripRed, stripGreen, stripBlue);
+            stripDriver.end();
             stripRainbowLoopIndex++;
             if (stripRainbowLoopIndex>=256) stripRainbowLoopIndex=0;
-            stripDriver.end();
         }
     }
   }
@@ -84,14 +93,14 @@
     newColor.replace("#","");
     
     long number = strtol( newColor.c_str(), NULL, 16);
-    long red = number >> 16;
-    long green = number >> 8 & 0xFF;
-    long blue = number & 0xFF; 
+    stripRed = number >> 16;
+    stripGreen = number >> 8 & 0xFF;
+    stripBlue = number & 0xFF; 
     
     stripRainbowLoopEnabled = false;
     
     stripDriver.begin();
-    stripDriver.SetColor(red, green, blue);
+    stripDriver.SetColor(stripRed, stripGreen, stripBlue);
     stripDriver.end();
     
     server.send(200, "application/json", ReturnOK);
@@ -102,7 +111,9 @@
    */
   String stripMainWebPage(String actualPage) {
       actualPage.replace("<!-- %%APP_ZONE%% -->", readFromFlash("app_strip.html"));   
-      actualPage.replace("%%COLOR%%", String("123456"));    // Replace actual color 
+      actualPage.replace("%%COLOR%%", ((stripRed<16)?"0":"")   + String(stripRed, HEX) + 
+                                      ((stripGreen<16)?"0":"") + String(stripGreen, HEX) + 
+                                      ((stripBlue<16)?"0":"")  + String(stripBlue, HEX));    // Replace with actual color (HTML format without #)
       return actualPage;
   }
 
