@@ -27,7 +27,6 @@ void setupWifi() {
             Logln("[NFO] IP : " + String(WiFi.localIP()));
             Logln("[NFO] HTTP Server started ... begin loop");
         } else {
-            Logln("");
             Logln("[ERR] WiFi not connected, starting AP !");
             setupWiFiAP(); 
         }

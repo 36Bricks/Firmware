@@ -54,7 +54,7 @@ void setupWiFiAP() {
 
   delay(2000);                              // Waits AP to fully start
   yield();
-  Serial.print("[NFO] IP : ");
+  Serial.print("[NFO] Brick IP : ");
   Serial.println(WiFi.softAPIP());
 }
 
