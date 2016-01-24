@@ -24,7 +24,15 @@ void setupConfigFromWifi() {
     ESP.restart();
   });
   server.on("/isBrick", []() {                            // To know if this is a brick, used by Android app brick discovery
-      server.send(200, "application/json", ReturnOK);
+      String JSONoutput = "";
+      JSONoutput += "{ \"brickType\": \"";
+      JSONoutput += BRICK_TYPE;
+      JSONoutput += "\", \"brickName\": \"";
+      JSONoutput += String(retreivedName.name);
+      JSONoutput += "\", \"brickVersion\": \"";
+      JSONoutput += FIRMWARE_VERSION;
+      JSONoutput += "\" }\r\n";
+      server.send(200, "application/json", JSONoutput);
   });
 }
 
