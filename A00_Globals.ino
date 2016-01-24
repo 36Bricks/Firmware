@@ -10,8 +10,11 @@ char* host = "36brick";
 #define MQTTuser "36Brick"
 #define MQTTpassword ""
 
-char *ftoa(char *a, double f, int precision)
-{
+
+/**
+ * float to char*, with precision
+ */
+char *ftoa(char *a, double f, int precision) {
  long p[] = {0,10,100,1000,10000,100000,1000000,10000000,100000000};
  
  char *ret = a;
@@ -23,3 +26,16 @@ char *ftoa(char *a, double f, int precision)
  itoa(desimal, a, 10);
  return ret;
 }
+
+/**
+ * Custom log function to print to serial and OLED screen if enable
+ */
+void Logln(String line) {
+  Serial.println("["+TheTime+"]"+line);
+}
+
+/***
+ * JSON constants
+ */
+#define ReturnOK "{ \"ret\": \"OK\" }\r\n"
+
