@@ -52,8 +52,6 @@ void setupWiFiAP() {
   Logln("[NFO] AP : " + AP_NameString);
   WiFi.softAP(AP_NameChar, WiFiAPPSK);      // Starts the Wifi AP
 
-  server.begin();                           // Starts the server to handle HTTP API
-  yield();
   delay(2000);                              // Waits AP to fully start
   yield();
   Serial.print("[NFO] IP : ");
@@ -91,6 +89,8 @@ void WifiSetupPage() {
   #if defined(OPTION_MQTT)
     SetupPage.replace("%%MQTT_SERV%%",retreivedMQTTserv.serv);          // Replace MQTT server adress in template
     SetupPage.replace("%%MQTT_PORT%%",String(retreivedMQTTport.port));  // Replace MQTT server port in template
+    SetupPage.replace("%%MQTT_ENABLED%%", ((retreivedMQTTenabled.enabled)?" selected='selected'":""));  // Select enabled ...
+    SetupPage.replace("%%MQTT_DISABLED%%",((retreivedMQTTenabled.enabled)?"":" selected='selected'"));  // ... or disabled in MQTT select
   #endif
     server.send(200, "text/html", SetupPage);             // Serv the page as html
 }
@@ -109,6 +109,7 @@ void SaveWifiSetup() {
   String newPASS = server.arg("pass");          // Parse wifi password
   String newMQTTServ = server.arg("mqttserv");  // Parse MQTT server adress
   String newMQTTPort = server.arg("mqttport");  // Parse MQTT server port
+  String newMQTTEnab = server.arg("mqttenab");  // Parse MQTT activation
   yield();  
 
   Logln("[EVT] New Name defined : "+newName);
@@ -119,7 +120,8 @@ void SaveWifiSetup() {
 #if defined(OPTION_MQTT)
   Logln("[EVT] New MQTT Server defined : "+newMQTTServ);
   Logln("[EVT] New MQTT Port defined : "+newMQTTPort);
-  SetMQTT(newMQTTServ, newMQTTPort);yield();                // Saves MQTT settings to eeprom
+  Logln("[EVT] New MQTT Activation defined : "+String((newMQTTEnab=="1")?"True":"False"));
+  SetMQTT(newMQTTServ, newMQTTPort, ((newMQTTEnab=="1")? true : false));yield();                // Saves MQTT settings to eeprom
 #endif  
   
   server.send(200, "text/html", HTMLoutput);    // Serves the thank you page as html

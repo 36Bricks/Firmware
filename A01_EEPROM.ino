@@ -27,14 +27,19 @@ SaveName retreivedName;
   int eepromMQTTportOffset = 256;       // Eeprom offset of MQTT port setting
   int eepromMQTTportValidOffset = 310;  // Eeprom offset of MQTT port validation string
   
-  struct SaveMQTTserv { char serv[48]; }; bool servOK;
-  struct SaveMQTTport { char port[10]; }; bool portOK;
+  int eepromMQTTenabledOffset = 320;       // Eeprom offset of MQTT enabled setting
+  int eepromMQTTenabledValidOffset = 352;  // Eeprom offset of MQTT enabled validation string
   
-  SaveMQTTserv retreivedMQTTserv;
-  SaveMQTTport retreivedMQTTport;
+  struct SaveMQTTserv     { char serv[48]; }; bool servOK;
+  struct SaveMQTTport     { char port[10]; }; bool portOK;
+  struct SaveMQTTenabled  { bool enabled;  }; bool enabledOK;
+  
+  SaveMQTTserv    retreivedMQTTserv;
+  SaveMQTTport    retreivedMQTTport;
+  SaveMQTTenabled retreivedMQTTenabled;
 #endif
 
-int eepromLength = 320;                 // Eeprom total used size
+int eepromLength = 364;                 // Eeprom total used size
 
 struct SaveValid { char valid[5]; };
 const char* saveValid = "true";
@@ -74,34 +79,41 @@ void SetSSID_PASS_NAME(String ssid, String pass, String name) {
 
 #if defined(OPTION_MQTT)
 /***
- * Writes MQTT server and MQTT port to EEPROM
+ * Writes MQTT server, port and activation to EEPROM
  */
-  void SetMQTT(String serv, String port) {
+  void SetMQTT(String serv, String port, bool enabled) {
       SaveMQTTserv newServ;
       SaveMQTTport newPort;
+      SaveMQTTenabled newEnabled;
       SaveValid ServValid;
       SaveValid PortValid;
+      SaveValid EnabledValid;
       
       strcpy(ServValid.valid, saveValid);
       strcpy(newServ.serv, serv.c_str());                             // -- New Serv
+      
       strcpy(PortValid.valid, saveValid);
       strcpy(newPort.port, port.c_str());                             // -- New Port
+      
+      strcpy(EnabledValid.valid, saveValid);
+      newEnabled.enabled = enabled;                                   // -- New activation
       
       EEPROM.begin(eepromLength);                                     // -- Open EEPROM fs
       
       EEPROM.put(eepromMQTTservOffset, newServ);                      // -- Write new Serv to fs
       EEPROM.put(eepromMQTTservValidOffset, ServValid);               // -- Write new Serv validation to fs
+      
       EEPROM.put(eepromMQTTportOffset, newPort);                      // -- Write new Port to fs
       EEPROM.put(eepromMQTTportValidOffset, PortValid);               // -- Write new Port validation to fs
+      
+      EEPROM.put(eepromMQTTenabledOffset, newEnabled);                // -- Write new activation to fs
+      EEPROM.put(eepromMQTTenabledValidOffset, EnabledValid);         // -- Write new activation validation to fs
       
       EEPROM.commit();                                                // -- Commit edit
       EEPROM.end();                                                   // -- Close EEPROM fs
       Logln("[NFO] New MQTT settings saved");
   }
 
-
-  void SetMQTTServer(String MQTTServer) { }
-  void SetMQTTPort(String MQTTPort) { }
 #endif
 
 /***
@@ -119,7 +131,7 @@ void ReadStoredConfig() {
       Logln("[NFO] Retreived SSID : " + String(retreivedSSID.ssid) );
       ssidOK = true;
   } else {
-      Logln("[ERR] No SSID defined ! Use \"setSSID newSSIDname\" to set one !");
+      Logln("[ERR] No SSID defined !");
       ssidOK = false;
   }
   
@@ -129,7 +141,7 @@ void ReadStoredConfig() {
       Logln("[NFO] Retreived PASS : " + String(retreivedPASS.pass) );
       passOK = true;
   } else {
-      Logln("[ERR] No password defined ! Use \"setPASS newPassword\" to set one !");
+      Logln("[ERR] No password defined !");
       passOK = false;
   }
 
@@ -145,7 +157,7 @@ void ReadStoredConfig() {
   }
 
 #if defined(OPTION_MQTT)
-  SaveValid MQTTservValid, MQTTportValid;
+  SaveValid MQTTservValid, MQTTportValid, MQTTenabledValid;
 
   EEPROM.get(eepromMQTTservValidOffset, MQTTservValid );      // -- Read MQTT Server validation string
   if (strcmp(MQTTservValid.valid, "true") == 0) {
@@ -165,6 +177,16 @@ void ReadStoredConfig() {
   } else {
       Logln("[ERR] No MQTTport defined !");
       portOK = false;
+  }
+  
+  EEPROM.get(eepromMQTTenabledValidOffset, MQTTenabledValid );    // -- Read MQTT Port validation string
+  if (strcmp(MQTTenabledValid.valid, "true") == 0) {
+      EEPROM.get(eepromMQTTenabledOffset, retreivedMQTTenabled );    // -- Read stored MQTT port
+      Logln("[NFO] Retreived MQTTenabled : " + String(((retreivedMQTTenabled.enabled==true)?"True":"False")));
+      enabledOK = true;
+  } else {
+      Logln("[ERR] No MQTTenabled defined !");
+      enabledOK = false;
   }
 #endif
 

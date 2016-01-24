@@ -7,9 +7,9 @@
 //#define MODULE_TELEINFO_EDF
 //#define MODULE_OLED
 //#define MODULE_PHOTO
-#define MODULE_DHT22
+//#define MODULE_DHT22
 //#define MODULE_NEOPIXELS
-#define MODULE_STRIP
+//#define MODULE_STRIP
 //#define MODULE_SWITCH_RETROFIT
 //#define MODULE_MOTION
 //#define MODULE_CURRENT
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------
 //-- Nothing to edit bellow this point                     --
 //-----------------------------------------------------------
-#define FIRMWARE_VERSION "36Brick Firmvare v0.34"
+#define FIRMWARE_VERSION "36Brick Firmvare v0.35"
 #define HTTP_API_PORT 80
 
 #include <ESP8266WiFi.h>

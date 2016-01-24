@@ -6,7 +6,7 @@
   #include <PubSubClient.h>
 
   #define MQTTprefix "36brick/"         // MQTT topic prefix for all publishes
-  #define MQTT_ESSAIS_MAX 12            // MQTT tries before fail
+  #define MQTT_ESSAIS_MAX 5             // MQTT tries before fail
 
   WiFiClient wifiClient;
   PubSubClient MQTTclient(wifiClient);
@@ -17,8 +17,8 @@
    * MQTT option setup : sets the MQTT server communication
    */
   void MQTTsetup() {
-      MQTTok = servOK && portOK;        // MQTT options (server and port) are defined and loaded
-      if (MQTTok) 
+      MQTTok = servOK && portOK && enabledOK;        // MQTT options (server and port) are defined and loaded
+      if (MQTTok && retreivedMQTTenabled.enabled) 
           MQTTclient.setServer(retreivedMQTTserv.serv, atoi(retreivedMQTTport.port));
       else 
           Logln("[NFO] MQTT disabled");
@@ -28,7 +28,7 @@
    * MQTT main loop : keeps MQTT connected and processes MQTT loop
    */
   void MQTTloop() {
-      if (wifiOK && MQTTok) {
+      if (wifiOK && MQTTok && retreivedMQTTenabled.enabled) {
         if (!MQTTclient.connected()) {
           MQTTreconnect();
         }
