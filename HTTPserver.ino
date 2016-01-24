@@ -13,6 +13,9 @@ void httpMainWebPage() {
 #if defined(MODULE_STRIP)       
   HTMLoutput = stripMainWebPage(HTMLoutput);        // Strip module main app section
 #endif   
+#if defined(MODULE_OUTPUTS)       
+  HTMLoutput = outputMainWebPage(HTMLoutput);        // Strip module main app section
+#endif   
 
   server.send(200, "text/html", HTMLoutput);    
 }

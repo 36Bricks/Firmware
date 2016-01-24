@@ -3,7 +3,7 @@
 //-----------------------------------------------------------
 //-- Enable or disable some modules and option             --
 //-----------------------------------------------------------
-//#define MODULE_OUTPUTS
+#define MODULE_OUTPUTS
 //#define MODULE_TELEINFO_EDF
 //#define MODULE_OLED
 //#define MODULE_PHOTO
@@ -72,7 +72,7 @@ void setup() {
   #endif
 
   #if defined(MODULE_OUTPUTS)     // Outputs module setup
-    OutputSetup();
+    outputSetup();
   #endif
 
   #if defined(MODULE_PHOTO)       // Photosensor module setup
