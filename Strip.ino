@@ -27,6 +27,7 @@
      server.on("/strip/hue", stripSetColorAPI);
      server.on("/strip/rainbow/on", stripEnableRainbowAPI);
      server.on("/strip/rainbow/off", stripDisableRainbowAPI);
+     server.on("/strip/getcolor", stripGetColorAPI);
   }
 
   /***
@@ -104,6 +105,19 @@
     stripDriver.end();
     
     server.send(200, "application/json", ReturnOK);
+  }
+  
+   /***
+   * HTTP JSON API to get current color (HTML format without #)
+   */
+  void stripGetColorAPI() {
+    String JSONoutput = "";
+    JSONoutput += "{ \"color\": \"";
+    JSONoutput += ((stripRed<16)?"0":"")   + String(stripRed, HEX) + 
+                  ((stripGreen<16)?"0":"") + String(stripGreen, HEX) + 
+                  ((stripBlue<16)?"0":"")  + String(stripBlue, HEX);
+    JSONoutput += "\" }\r\n";
+    server.send(200, "application/json", JSONoutput);
   }
   
   /***
