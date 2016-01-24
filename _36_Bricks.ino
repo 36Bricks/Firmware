@@ -5,7 +5,7 @@
 //-----------------------------------------------------------
 #define MODULE_OUTPUTS
 //#define MODULE_TELEINFO_EDF
-//#define MODULE_OLED
+#define MODULE_OLED
 //#define MODULE_PHOTO
 //#define MODULE_DHT22
 //#define MODULE_NEOPIXELS
@@ -50,10 +50,6 @@ void setup() {
   Serial.begin(115200);           // Starts serial communication for log and debug purposes
   
   Logln("");
-  #if defined(MODULE_OLED)        // OLED module setup
-    OLEDsetup();
-  #endif
-
   Logln("[NFO] Power ON");
   Logln("[NFO] Serial started");  
   
@@ -153,10 +149,6 @@ void loop() {
 
   #if defined(MODULE_TELEINFO_EDF)  // Teleinfo EDF module loop
     EDFloop();
-  #endif
-
-  #if defined(MODULE_OLED)      // OLED screen module loop
-    OLEDloop();
   #endif
 
   #if defined(MODULE_SWITCH_RETROFIT) // SwitchRetrofit module loop

@@ -65,9 +65,6 @@ Gather informations from domestic EDF electric counter, available on HTTP API an
 #### NeoPixels
 Drives up to 1024 adressable RGB Leds using HTTP API
 
-#### OLED
-Drives a small 128x64px OLED screen (only for debug atm)
-
 #### Outputs
 Drives two 220v relays using HTTP API
 
