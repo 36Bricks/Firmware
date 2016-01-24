@@ -5,7 +5,6 @@
 //-----------------------------------------------------------
 #define MODULE_OUTPUTS
 //#define MODULE_TELEINFO_EDF
-#define MODULE_OLED
 //#define MODULE_PHOTO
 //#define MODULE_DHT22
 //#define MODULE_NEOPIXELS
