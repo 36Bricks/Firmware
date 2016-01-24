@@ -20,6 +20,8 @@ Adafruit NeoPixel Arduino library : https://github.com/adafruit/Adafruit_NeoPixe
 
 AltSoftSerial Library : https://github.com/PaulStoffregen/AltSoftSerial
 
+LED Strip Driver v0.9b : https://github.com/letsgoING/Libraries/tree/master/LEDStripDriver
+
 Arduino Client for MQTT : http://pubsubclient.knolleary.net/
 
 ## Installation
@@ -95,6 +97,8 @@ ESP8266 core files are licensed under LGPL.
 ESP8266 core includes an xtensa gcc toolchain, which is also under GPL.
 
 Adafruit DHT22 and NeoPixels Arduino libraries are developed and maintained by the Adafuit team.
+
+LED Strip Driver v0.9b licensed under GNU and maintained by Frankie.Chu at Seeed Studio.
 
 AltSoftSerial Arduino library is developed and maintained by Paul Stoffregen
 
