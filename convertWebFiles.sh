@@ -42,7 +42,7 @@ INDEX=0
 for i in $(ls -1); do
   CONTENT=$(cat $i | xxd -i)
   CONTENT_LEN=$(echo $CONTENT | grep -o '0x' | wc -l)  
-  MIMETYPE=$(file --mime-type -b $i)
+  MIMETYPE=$(file --mime-type -z -b $i)
   
   echo "  {" >> $OUTFILE
   echo "    .filename = \"$i\"," >> $OUTFILE
