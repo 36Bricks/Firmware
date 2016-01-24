@@ -1,10 +1,27 @@
 #include "flashfiles.h"
 
 /***
+ * Brick main web page, builds a page with a section for each enabled module
+ */
+void httpMainWebPage() {
+  String HTMLoutput = readFromFlash("header.html") + readFromFlash("app.html");      
+  HTMLoutput.replace("%%TYPE%%",BRICK_TYPE);        // Replace brick type in template
+  
+#if defined(MODULE_DHT22)       
+  HTMLoutput = dht22MainWebPage(HTMLoutput);        // DHT22 module main app section
+#endif   
+#if defined(MODULE_STRIP)       
+  HTMLoutput = stripMainWebPage(HTMLoutput);        // Strip module main app section
+#endif   
+
+  server.send(200, "text/html", HTMLoutput);    
+}
+
+/***
  * Serves a file directly from Flash memory 
  * Files are defined in websites.h, generated using convertWebFiles.sh
  * 
- * CAUTION : Ressources have to be gziped (*.ico, *.js, *.css, etc...)
+ * CAUTION : Some ressources have to be gziped (*.ico, *.js, *.css, *.png, etc...)
  */
 bool serveFromFlash(String path) {
   if(path.endsWith("/")) path += "index.html";
@@ -30,7 +47,7 @@ bool serveFromFlash(String path) {
       long tBefore = millis();
       client.write(*filecontent, SERVE_FROM_FLASH_PACKET_SIZE);
       
-      //Logln("[NFO] Served " + String(files[i].filename) + " from Flash in " + String(millis()-tBefore) + "ms");
+      Logln("[NFO] Served " + String(files[i].filename) + " from Flash in " + String(millis()-tBefore) + "ms");
       return true;
     }
   }
@@ -38,7 +55,7 @@ bool serveFromFlash(String path) {
 }
 
 /***
- * Reads a file directly from Flash memory 
+ * Reads a file directly from Flash memory to a String
  */
 String readFromFlash(String path) {
   if(path.endsWith("/")) path += "index.html";
@@ -63,7 +80,10 @@ String readFromFlash(String path) {
   return String("ERROR");
 }
 
-
+/***
+ * Handle all undefined endpoints, even resource files directly stored on flash
+ * 404 page filled with system informations
+ */
 void handleNotFound() {
   
   // try to find the file in the flash
@@ -88,19 +108,5 @@ void handleNotFound() {
   message += "getCycleCount: " + String(ESP.getCycleCount()) + " Cycles\n";
   message += "UpTime.......: " + String(millis()/1000) + " Seconds\n";
   server.send(404, "text/plain", message);
-}
-
-void httpMainWebPage() {
-  String HTMLoutput = readFromFlash("header.html") + readFromFlash("app.html");      
-  HTMLoutput.replace("%%TYPE%%",BRICK_TYPE);    // Replace brick type in template
-  
-#if defined(MODULE_DHT22)       
-  HTMLoutput = dht22MainWebPage(HTMLoutput);        // DHT22 module main app section
-#endif   
-#if defined(MODULE_STRIP)       
-  HTMLoutput = stripMainWebPage(HTMLoutput);        // DHT22 module main app section
-#endif   
-
-  server.send(200, "text/html", HTMLoutput);    
 }
 
