@@ -2,7 +2,8 @@
  * DHT22 : Temperature and humidity module using DHT22 sensor
  */
 
- // TODO : Find why we have to reset the sensor... we could save one GPIO
+ // TODO : Find why we have to reset the sensor... we could save one GPIO... perhaps because powered on 3.3v instead of 5v
+ // TODO : Add min and max graph values for temperature
  
 #if defined(MODULE_DHT22)
   #include <DHT.h>
@@ -81,5 +82,16 @@
     JSONoutput += "\" }\r\n";
     server.send(200, "application/json", JSONoutput);
   }
+
+  /***
+   * App section for brick main web page
+   */
+  String dht22MainWebPage(String actualPage) {
+      actualPage.replace("<!-- %%APP_ZONE%% -->", readFromFlash("app_dht22.html"));    
+      actualPage.replace("%%TEMP%%", String(dht22TempLevel));    // Replace actual temperature
+      actualPage.replace("%%HUMY%%", String(dht22HumyLevel));    // Replace actual humidity
+      return actualPage;
+  }
+
 #endif
 

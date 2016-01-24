@@ -1,4 +1,3 @@
-
 //-----------------------------------------------------------
 //----------------- FIRMWARE CONFIGURATION ------------------
 //-----------------------------------------------------------
@@ -8,12 +7,12 @@
 //#define MODULE_TELEINFO_EDF
 //#define MODULE_OLED
 //#define MODULE_PHOTO
-//#define MODULE_DHT22
+#define MODULE_DHT22
 //#define MODULE_NEOPIXELS
-//#define MODULE_STRIP
+#define MODULE_STRIP
 //#define MODULE_SWITCH_RETROFIT
 //#define MODULE_MOTION
-#define MODULE_CURRENT
+//#define MODULE_CURRENT
 
 #define OPTION_MQTT
 #define OPTION_NTP
@@ -24,7 +23,6 @@
 //-- Select one of the following module types              --
 //-----------------------------------------------------------
 #define BRICK_TYPE "MultiSensor"
-//#define BRICK_TYPE "MultiSensorPlus"
 //#define BRICK_TYPE "Plug"
 //#define BRICK_TYPE "DualPlug"
 //#define BRICK_TYPE "Muscle"
@@ -34,7 +32,7 @@
 //-----------------------------------------------------------
 //-- Nothing to edit bellow this point                     --
 //-----------------------------------------------------------
-#define FIRMWARE_VERSION "36Brick Firmvare v0.31"
+#define FIRMWARE_VERSION "36Brick Firmvare v0.34"
 #define HTTP_API_PORT 80
 
 #include <ESP8266WiFi.h>
@@ -105,6 +103,8 @@ void setup() {
   setupConfigFromWifi();      // setups the config web page
   wifiUpdateSetup();          // setups the firmware update web page
   
+  server.on("/main-web-page.html", httpMainWebPage);  
+  server.onNotFound(handleNotFound);
   server.begin();             // Starts the web server to handle all HTTP requests
   MDNS.addService("http", "tcp", 80);
   
@@ -164,6 +164,5 @@ void loop() {
   #endif
 
   server.handleClient();      // Handle all clients connected to server
-
 }
 

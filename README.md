@@ -23,11 +23,14 @@ AltSoftSerial Library : https://github.com/PaulStoffregen/AltSoftSerial
 Arduino Client for MQTT : http://pubsubclient.knolleary.net/
 
 ## Installation
-Follow this guide to enable and setup ESP8266 in Arduino ide : https://learn.adafruit.com/adafruit-huzzah-esp8266-breakout/using-arduino-ide
-
 First rename the source folder to "_36_Bricks" as Arduino IDE need it to find the main file by name.
 
 Open the project with Arduino IDE, add all needed libraries using "Sketch -> Include library -> Manage libraries ..." and flash it on the ESP.
+
+Follow this guide to enable and setup ESP8266 core in Arduino ide : https://learn.adafruit.com/adafruit-huzzah-esp8266-breakout/using-arduino-ide and using STAGING 2.1.0-rc1 board manager link (http://arduino.esp8266.com/staging/package_esp8266com_index.json)
+
+And finaly, restart Arduino IDE once !
+
 
 ## Firmware modules
 The firmware is devided into modules. Modules can be enabled and disabled according to your needs just before flashing it to the brick.

@@ -20,7 +20,7 @@ void setupConfigFromWifi() {
   server.on("/setup", WifiSetupPage);                     // Setup web page
   server.on("/saveCFG", SaveWifiSetup);                   // Setup form destination
   server.on("/reset", []() {                              // Resets the brick
-    server.send ( 200, "text/plain", "Resetting..." );
+    server.send( 200, "text/plain", "Resetting..." );
     ESP.restart();
   });
 }
@@ -65,7 +65,7 @@ void setupWiFiAP() {
  */
 void WifiSetupPage() {
     Logln("[NFO] Served setup page");
-    String SetupPage = ConfigPage;      // Setup page template
+    String SetupPage = readFromFlash("header.html") + readFromFlash("setup.html");      // Setup page template
 
     // Fill the select box with available networks
     int n = WiFi.scanNetworks();        // Scans networks
@@ -73,13 +73,15 @@ void WifiSetupPage() {
     for (int i = 0; i < n; ++i) {
         opt += "<option value='";
         opt += WiFi.SSID(i);
-        opt += "'>";
+        opt += "'";
+        opt += strcmp(WiFi.SSID(i).c_str(),retreivedSSID.ssid)?"":" selected='selected' ";
+        opt += ">";
         opt += WiFi.SSID(i);
         opt += " (";
         opt += WiFi.RSSI(i);
-        opt += "db)";
-        opt += (WiFi.encryptionType(i) == ENC_TYPE_NONE)?" ":"*";
-        opt += "</option>";
+        opt += "db";
+        opt += (WiFi.encryptionType(i) == ENC_TYPE_NONE)?"":" / PSK";
+        opt += ")</option>";
         yield();
     }
     SetupPage.replace("%%TYPE%%",BRICK_TYPE);             // Replace brick type in template
@@ -99,7 +101,7 @@ void WifiSetupPage() {
 void SaveWifiSetup() {
   Logln("[NFO] Setup form submitted");
   
-  String HTMLoutput = ThxPage;                  // Thank you page template
+  String HTMLoutput = readFromFlash("header.html") + readFromFlash("setup-thx.html");      // Thank you page template
   HTMLoutput.replace("%%TYPE%%",BRICK_TYPE);    // Replace brick type in template
 
   String newName = server.arg("name");          // Parse brick name

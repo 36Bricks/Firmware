@@ -7,7 +7,10 @@ void wifiUpdateSetup() {
     server.on("/firmware", HTTP_GET, [](){
       server.sendHeader("Connection", "close");
       server.sendHeader("Access-Control-Allow-Origin", "*");
-      server.send(200, "text/html", serverUpdate);
+      String firmPage = readFromFlash("header.html") + readFromFlash("firmware-update.html");  // Firmware update page
+      String firmVersion = String(FIRMWARE_VERSION) + " for " + String(BRICK_TYPE);
+      firmPage.replace("%%VERSION%%",firmVersion); // Replace firmware version in template
+      server.send(200, "text/html", firmPage); 
     });
     
     // Firmware update file upload (form destination)
@@ -15,25 +18,25 @@ void wifiUpdateSetup() {
       if(server.uri() != "/update") return;
       HTTPUpload& upload = server.upload();
       if(upload.status == UPLOAD_FILE_START){
-        Serial.setDebugOutput(true);
-        WiFiUDP::stopAll();
-        uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
-        Logln("[NFO] Update : " + String(upload.filename) + " - Max = " + String(maxSketchSpace));
-        if(!Update.begin(maxSketchSpace)){//start with max available size
-          Update.printError(Serial);
-        }
+          Serial.setDebugOutput(true);
+          WiFiUDP::stopAll();
+          uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
+          Logln("[NFO] Update : " + String(upload.filename) + " - Max = " + String(maxSketchSpace));
+          if(!Update.begin(maxSketchSpace)){//start with max available size
+              Update.printError(Serial);
+          }
       } else if(upload.status == UPLOAD_FILE_WRITE){
-        if(Update.write(upload.buf, upload.currentSize) != upload.currentSize){
-          Update.printError(Serial);
-        }
+          if(Update.write(upload.buf, upload.currentSize) != upload.currentSize){
+              Update.printError(Serial);
+          }
       } else if(upload.status == UPLOAD_FILE_END){
-        if(Update.end(true)){ //true to set the size to the current progress
-          Logln("[NFO] Update Success : " + String(upload.totalSize));
-          Logln("[NFO] Rebooting ...");
-        } else {
-          Update.printError(Serial);
-        }
-        Serial.setDebugOutput(false);
+          if(Update.end(true)){ //true to set the size to the current progress
+              Logln("[NFO] Update Success : " + String(upload.totalSize));
+              Logln("[NFO] Rebooting ...");
+          } else {
+              Update.printError(Serial);
+          }
+          Serial.setDebugOutput(false);
       }
       yield();
     });
@@ -42,7 +45,8 @@ void wifiUpdateSetup() {
     server.on("/update", HTTP_POST, [](){
       server.sendHeader("Connection", "close");
       server.sendHeader("Access-Control-Allow-Origin", "*");
-      server.send(200, "text/plain", (Update.hasError())?"FAIL":"OK");
+      String firmPage = readFromFlash("header.html") + readFromFlash("firmware-update-complete.html");  // Firmware update complete page
+      server.send(200, "text/html", firmPage); 
       ESP.restart();
     });
 }

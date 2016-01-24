@@ -96,6 +96,16 @@
     
     server.send(200, "application/json", ReturnOK);
   }
+  
+  /***
+   * App section for brick main web page
+   */
+  String stripMainWebPage(String actualPage) {
+      actualPage.replace("<!-- %%APP_ZONE%% -->", readFromFlash("app_strip.html"));   
+      actualPage.replace("%%COLOR%%", String("123456"));    // Replace actual color 
+      return actualPage;
+  }
+
 
 
 #endif
