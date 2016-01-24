@@ -103,9 +103,9 @@ void setup() {
   setupConfigFromWifi();      // setups the config web page
   wifiUpdateSetup();          // setups the firmware update web page
   
-  server.on("/main-web-page.html", httpMainWebPage);  
-  server.onNotFound(handleNotFound);
-  server.begin();             // Starts the web server to handle all HTTP requests
+  server.on("/", httpMainWebPage);    // Brick main app page, built from each module app section
+  server.onNotFound(handleNotFound);  // Handle all other files (from flash) and 404
+  server.begin();                     // Starts the web server to handle all HTTP requests
   MDNS.addService("http", "tcp", 80);
   
   #if defined(OPTION_NTP)     // NTP time sync service setup
