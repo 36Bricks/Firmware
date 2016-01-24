@@ -23,6 +23,9 @@ void setupConfigFromWifi() {
     server.send( 200, "text/plain", "Resetting..." );
     ESP.restart();
   });
+  server.on("/isBrick", []() {                            // To know if this is a brick, used by Android app brick discovery
+      server.send(200, "application/json", ReturnOK);
+  });
 }
 
 /**
