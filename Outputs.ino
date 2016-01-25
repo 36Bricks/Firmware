@@ -96,7 +96,7 @@
    * App section for brick main web page
    */
   String outputMainWebPage(String actualPage) {
-      actualPage.replace("<!-- %%APP_ZONE%% -->", readFromFlash("app_outputs.html"));    
+      actualPage.replace("<!-- %%APP_ZONE%% -->", readFromSpiffs("/app_outputs.html"));    
       return actualPage;
   }
 

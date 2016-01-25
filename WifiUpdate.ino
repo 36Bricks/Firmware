@@ -7,7 +7,7 @@ void wifiUpdateSetup() {
     server.on("/firmware", HTTP_GET, [](){
       server.sendHeader("Connection", "close");
       server.sendHeader("Access-Control-Allow-Origin", "*");
-      String firmPage = readFromFlash("header.html") + readFromFlash("firmware-update.html");  // Firmware update page
+      String firmPage = readFromSpiffs("/header.html") + readFromSpiffs("/firmware-update.html");  // Firmware update page
       String firmVersion = String(FIRMWARE_VERSION) + " for " + String(BRICK_TYPE);
       firmPage.replace("%%VERSION%%",firmVersion); // Replace firmware version in template
       server.send(200, "text/html", firmPage); 
@@ -45,7 +45,7 @@ void wifiUpdateSetup() {
     server.on("/update", HTTP_POST, [](){
       server.sendHeader("Connection", "close");
       server.sendHeader("Access-Control-Allow-Origin", "*");
-      String firmPage = readFromFlash("header.html") + readFromFlash("firmware-update-complete.html");  // Firmware update complete page
+      String firmPage = readFromSpiffs("/header.html") + readFromSpiffs("/firmware-update-complete.html");  // Firmware update complete page
       server.send(200, "text/html", firmPage); 
       ESP.restart();
     });

@@ -41,7 +41,7 @@ void setupConfigFromWifi() {
  */
 void WifiSetupPage() {
     Logln("[NFO] Served setup page");
-    String SetupPage = readFromFlash("header.html") + readFromFlash("setup.html");      // Setup page template
+    String SetupPage = readFromSpiffs("/header.html") + readFromSpiffs("/setup.html");      // Setup page template
 
     // Fill the select box with available networks
     int n = WiFi.scanNetworks();        // Scans networks
@@ -79,7 +79,7 @@ void WifiSetupPage() {
 void SaveWifiSetup() {
   Logln("[NFO] Setup form submitted");
   
-  String HTMLoutput = readFromFlash("header.html") + readFromFlash("setup-thx.html");      // Thank you page template
+  String HTMLoutput = readFromSpiffs("/header.html") + readFromSpiffs("/setup-thx.html");      // Thank you page template
   HTMLoutput.replace("%%TYPE%%",BRICK_TYPE);    // Replace brick type in template
 
   String newName = server.arg("name");          // Parse brick name

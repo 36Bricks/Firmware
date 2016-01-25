@@ -2,7 +2,8 @@
  * Globals definitions
  */
 #include <elapsedMillis.h>
-#define SERVE_FROM_FLASH_PACKET_SIZE 1024
+#include "FS.h"
+#define SERVE_FROM_FLASH_PACKET_SIZE 128
 
 String TheTime = "BOOT-TIME";     // Local time for logs
 

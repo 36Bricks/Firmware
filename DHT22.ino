@@ -87,7 +87,7 @@
    * App section for brick main web page
    */
   String dht22MainWebPage(String actualPage) {
-      actualPage.replace("<!-- %%APP_ZONE%% -->", readFromFlash("app_dht22.html"));    
+      actualPage.replace("<!-- %%APP_ZONE%% -->", readFromSpiffs("/app_dht22.html"));    
       actualPage.replace("%%TEMP%%", String(dht22TempLevel));    // Replace actual temperature
       actualPage.replace("%%HUMY%%", String(dht22HumyLevel));    // Replace actual humidity
       return actualPage;

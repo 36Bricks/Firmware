@@ -124,7 +124,7 @@
    * App section for brick main web page
    */
   String stripMainWebPage(String actualPage) {
-      actualPage.replace("<!-- %%APP_ZONE%% -->", readFromFlash("app_strip.html"));   
+      actualPage.replace("<!-- %%APP_ZONE%% -->", readFromSpiffs("/app_strip.html"));   
       actualPage.replace("%%COLOR%%", ((stripRed<16)?"0":"")   + String(stripRed, HEX) + 
                                       ((stripGreen<16)?"0":"") + String(stripGreen, HEX) + 
                                       ((stripBlue<16)?"0":"")  + String(stripBlue, HEX));    // Replace with actual color (HTML format without #)

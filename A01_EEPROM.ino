@@ -16,6 +16,7 @@ struct SaveSSID { char ssid[48]; }; bool ssidOK;
 struct SavePASS { char pass[48]; }; bool passOK;
 struct SaveName { char name[48]; }; bool nameOK;
 
+
 SaveSSID retreivedSSID;
 SavePASS retreivedPASS;
 SaveName retreivedName;
