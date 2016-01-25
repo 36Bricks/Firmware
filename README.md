@@ -12,7 +12,7 @@ This git project is the embedded software (firmware) for ESP8266, flashed on eac
 ## Requirements
 Arduino IDE 1.6.4 or better : https://www.arduino.cc/en/Main/Software
 
-ESP8266 Board Package for Arduino IDE : https://github.com/esp8266/Arduino
+ESP8266 Board Package for Arduino IDE : https://github.com/esp8266/Arduino [ Use staging version >2.1 ]
 
 Adafruit DHT22 Arduino library : https://github.com/adafruit/DHT-sensor-library
 
@@ -46,6 +46,9 @@ Allows to flash new firmware through WiFi.
 
 #### EEPROM (mandatory)
 Manages the storage of brick configuration on embedded EEPROM to save them upon reboot and long-term power off.
+
+#### SPIFFS (mandatory)
+Manages the storage of web files for brick 'web app' on embedded SPIFFS, 1Mo available.
 
 #### NTP
 Time sync of the brick
