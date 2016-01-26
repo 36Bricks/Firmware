@@ -8,23 +8,9 @@
  */
 void spiffsSetup() {
     if (SPIFFS.begin()) {
-        Logln("[NFO] SPIFFS opened");
         FSInfo info;
         if (SPIFFS.info(info)) {
-            Serial.printf("[NFO] SPIFFS Total: %u ko, Used: %u ko, Block: %u ko, Page: %u, Max open files: %u, Max path len: %u\n",
-                  info.totalBytes/1024,
-                  info.usedBytes/1024,
-                  info.blockSize/1024,
-                  info.pageSize,
-                  info.maxOpenFiles,
-                  info.maxPathLength
-                 );
-        }
-        Dir root = SPIFFS.openDir("/");
-        while (root.next()) {
-          String fileName = root.fileName();
-          File f = root.openFile("r");
-          Serial.printf("[NFO] %s: %d\r\n", fileName.c_str(), f.size());
+            Logln("[NFO] SPIFFS opened : " + String(info.usedBytes/1024) + " ko used / " + String(info.totalBytes/1024) + " ko total");
         }
     } else {
         Logln("[ERR] SPIFFS error : unable to open !");
