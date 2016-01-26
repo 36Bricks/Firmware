@@ -6,13 +6,14 @@
 #define MODULE_OUTPUTS
 //#define MODULE_TELEINFO_EDF
 //#define MODULE_PHOTO
-#define MODULE_DHT22
+//#define MODULE_DHT22
 //#define MODULE_NEOPIXELS
-#define MODULE_STRIP
+//#define MODULE_STRIP
 //#define MODULE_SWITCH_RETROFIT
 //#define MODULE_MOTION
 //#define MODULE_CURRENT
 
+#define OPTION_AUTO_UPDATE
 #define OPTION_MQTT
 #define OPTION_NTP
 
@@ -31,7 +32,7 @@
 //-----------------------------------------------------------
 //-- Nothing to edit bellow this point                     --
 //-----------------------------------------------------------
-#define FIRMWARE_VERSION "36Brick Firmvare v0.36.0"
+#define FIRMWARE_VERSION "36Brick Firmware v0.36.0"
 #define HTTP_API_PORT 80
 
 #include <ESP8266WiFi.h>
@@ -96,6 +97,11 @@ void setup() {
     #endif
     
     setupWifi();                // Connects to user wifi
+
+    #if defined(OPTION_AUTO_UPDATE)     
+        checkForAutoUpdate();       // Automatic online update
+    #endif
+    
     setupConfigFromWifi();      // setups the config web page
     wifiUpdateSetup();          // setups the firmware update web page
     
@@ -107,6 +113,8 @@ void setup() {
     #if defined(OPTION_NTP)     // NTP time sync service setup
         ntpSetup();     
     #endif
+
+    Logln("[NFO] Brick started, beginning operations ...");  
 
 }
 

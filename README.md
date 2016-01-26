@@ -50,6 +50,9 @@ Manages the storage of brick configuration on embedded EEPROM to save them upon 
 #### SPIFFS (mandatory)
 Manages the storage of web files for brick 'web app' on embedded SPIFFS, 1Mo available.
 
+#### AutoUpdate
+Allows to auto update official firmware through internet on 36Bricks server. Disable this module if you flash customized firmware on the brick.
+
 #### NTP
 Time sync of the brick
 
