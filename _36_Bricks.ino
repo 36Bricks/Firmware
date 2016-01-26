@@ -32,7 +32,7 @@
 //-----------------------------------------------------------
 //-- Nothing to edit bellow this point                     --
 //-----------------------------------------------------------
-#define FIRMWARE_VERSION "36Brick Firmware v0.36.0"
+#define FIRMWARE_VERSION "36Brick Firmware v0.37.0"
 #define HTTP_API_PORT 80
 
 #include <ESP8266WiFi.h>
