@@ -33,15 +33,22 @@ class photoModule : public Module {
             long now = millis();
             if (now - this->lastUpdt > PHOTOSENSOR_INTERVAL_MS) {
                 this->lastUpdt = now; 
-                
-                this->level = analogRead(this->pin);
-                this->levelPrc = map(this->level, 0, 1024, 0, 100);
-                this->levelPrc = constrain(this->levelPrc, 0, 100);
-                
-                #if defined(OPTION_MQTT)
-                    MQTT.publish(topicLight, String(this->level).c_str());
-                    MQTT.publish(topicLightPrc, String(this->levelPrc).c_str());
-                #endif
+
+                int tmp = analogRead(this->pin);
+                if (tmp != this->level) {
+                    this->level = tmp
+                    #if defined(OPTION_MQTT)
+                        MQTT.publish(topicLight, String(this->level).c_str());
+                    #endif
+                }
+
+                tmp = constrain(map(this->level, 0, 1024, 0, 100), 0, 100);
+                if (tmp != this->levelPrc) {
+                    this->levelPrc = tmp
+                    #if defined(OPTION_MQTT)
+                        MQTT.publish(topicLightPrc, String(this->levelPrc).c_str());
+                    #endif
+                }
             }
         }
 
