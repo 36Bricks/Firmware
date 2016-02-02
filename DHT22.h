@@ -43,23 +43,27 @@ class dht22Module : public Module {
             long now = millis();
             if (now - this->lastUpdt > DHT22_INTERVAL_MS) {
                 this->lastUpdt = now; 
-                
-                this->humyLevel = dht->readHumidity();         // Reads humidity
-                this->tempLevel = dht->readTemperature();      // Reads temperature
-                
-                if (!isnan(this->humyLevel)) {
-                    #if defined(OPTION_MQTT)
-                        MQTT.publish(topicHumidity, String(this->humyLevel).c_str());
-                    #endif
+
+                float tmp = dht->readHumidity();       // Reads humidity
+                if (!isnan(tmp)) {
+                    if (tmp != this->humyLevel) {
+                        this->humyLevel = tmp;
+                        #if defined(OPTION_MQTT)
+                            MQTT.publish(topicHumidity, String(this->humyLevel).c_str());
+                        #endif
+                    }
                 } else {
-                    this->ResetDHT22();                         // Resets if there is en error, hope next try will be OK
+                    this->ResetDHT22();            // Resets if there is en error, hope next try will be OK
                     return;
                 }
-                if (!isnan(this->tempLevel)) {
-                    #if defined(OPTION_MQTT)
+                
+                tmp = dht->readTemperature();      // Reads temperature
+                if ((!isnan(tmp)) && (tmp != this->tempLevel)) {
+                     this->tempLevel = tmp;
+                     #if defined(OPTION_MQTT)
                         MQTT.publish(topicTemperature, String(this->tempLevel).c_str());
-                    #endif
-                } 
+                     #endif
+                }
             }
         }
         
