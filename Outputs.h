@@ -54,6 +54,7 @@ class outputModule : public Module {
         */
         void activateOutput1() {
             digitalWrite(this->pin1, HIGH); 
+            blink1Enabled = false;
             if (!this->output1) {
                 this->output1 = true;
                 #if defined(OPTION_MQTT)
@@ -68,6 +69,7 @@ class outputModule : public Module {
         */
         void desactivateOutput1() {
             digitalWrite(this->pin1, LOW); 
+            blink1Enabled = false;
             if (this->output1) {
                 this->output1 = false;
                 #if defined(OPTION_MQTT)
@@ -82,6 +84,7 @@ class outputModule : public Module {
         */
         void activateOutput2() {
             digitalWrite(this->pin2, HIGH); 
+            blink2Enabled = false;
             if (!this->output2) {
                 this->output2 = true;
                 #if defined(OPTION_MQTT)
@@ -96,6 +99,7 @@ class outputModule : public Module {
         */
         void desactivateOutput2() {
             digitalWrite(this->pin2, LOW); 
+            blink2Enabled = false;
             if (this->output2) {
                 this->output2 = false;
                 #if defined(OPTION_MQTT)
@@ -138,10 +142,12 @@ class outputModule : public Module {
                 this->lastBlink1Switch = millis();
                 if (this->output1) {
                     Log::Logln("[NFO] Output 1 blink OFF");
-                    desactivateOutput1();
+                    digitalWrite(this->pin1, LOW); 
+                    this->output1 = false;
                 } else {
                     Log::Logln("[NFO] Output 1 blink ON");
-                    activateOutput1();
+                    digitalWrite(this->pin1, HIGH); 
+                    this->output1 = true;
                 }
             }
         }
@@ -160,10 +166,12 @@ class outputModule : public Module {
                 this->lastBlink2Switch = millis();
                 if (this->output2) {
                     Log::Logln("[NFO] Output 2 blink OFF");
-                    desactivateOutput2();
+                    digitalWrite(this->pin2, LOW); 
+                    this->output2 = false;
                 } else {
                     Log::Logln("[NFO] Output 2 blink ON");
-                    activateOutput2();
+                    digitalWrite(this->pin2, HIGH); 
+                    this->output2 = true;
                 }
             }
         }
