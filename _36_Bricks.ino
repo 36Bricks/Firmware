@@ -6,7 +6,7 @@
 #define MODULE_OUTPUTS
 //#define MODULE_TELEINFO_EDF
 //#define MODULE_PHOTO
-//#define MODULE_DHT22
+#define MODULE_DHT22
 //#define MODULE_NEOPIXELS
 //#define MODULE_STRIP
 //#define MODULE_SWITCH_RETROFIT
@@ -18,8 +18,6 @@
 #define OPTION_NTP
 
 //-----------------------------------------------------------
-//----------------------- MODULE TYPE -----------------------
-//-----------------------------------------------------------
 //-- Select one of the following module types              --
 //-----------------------------------------------------------
 #define BRICK_TYPE "MultiSensor"
@@ -27,95 +25,136 @@
 //#define BRICK_TYPE "DualPlug"
 //#define BRICK_TYPE "Muscle"
 
-//-----------------------------------------------------------
-//---------------------- END OF CONFIG ----------------------
-//-----------------------------------------------------------
-//-- Nothing to edit bellow this point                     --
-//-----------------------------------------------------------
-#define FIRMWARE_VERSION "36Brick Firmware v0.37.0"
-#define HTTP_API_PORT 80
+#define FIRMWARE_VERSION "36Brick Firmware v0.38.0"
 
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
+#include <EEPROM.h>
 
-ESP8266WebServer server(HTTP_API_PORT);
+#include "Globals.h"
+#include "Settings.h"
+#include "Module.h"
+#include "Option.h"
+#include "FS.h"
+#include "SPIFFS.h"
+#include "MainWifi.h"
+#include "MainServer.h"
 
-bool wifiOK = false;
+#if defined(OPTION_NTP)                         // NTP time sync service setup
+    #include <TimeLib.h> 
+    #include <WiFiUdp.h>
+    #define NTP_SERVER_NAME "fr.pool.ntp.org"   // NTP server (or pool) adress
+    #define NTP_INTERVAL_MS 500                 // Local time update interval : 0.5 seconds
+    #define NTP_TIME_ZONE 1                     // Central European Time
+    #define UDP_LOCAL_PORT 2390                 // Local UDP port for NTP answer
+    #include "NTP.h"
+    ntpOption NTP;
+    #include "getNtpTime.h"
+#endif
+
+#if defined(OPTION_MQTT)                    // MQTT option setup
+    #include <PubSubClient.h>
+    #define MQTTprefix "36brick/"           // MQTT topic prefix for all publishes
+    #define MQTT_ESSAIS_MAX 5               // Connection tries before fail
+    #include "MQTT.h"
+    mqttOption MQTT;
+#endif
+
+#if defined(OPTION_AUTO_UPDATE)             // Auto Update option
+    #include <ESP8266HTTPClient.h>
+    #include <ESP8266httpUpdate.h>
+    #define AUTO_UPDATE_URL  "http://192.168.2.8/bricks/update.php" // Update server url
+    #include "AutoUpdate.h"
+    autoUpdateOption autoUpdate;
+#endif
+
+#if defined(MODULE_OUTPUTS)                 // Outputs module
+    #include "Outputs.h"
+    outputModule outputsModule1(D0, D1);    // Change relays pins here
+#endif
+
+#if defined(MODULE_DHT22)                   // DHT22 module
+    #include <DHT.h>                        // DHT library
+    #define DHTTYPE DHT22                   // Sensor type : DHT22
+    #define DHT22_INTERVAL_MS 5000          // read interval
+    #include "DHT22.h"
+    dht22Module dht22Module1(D4, D8);       // Change sensor pins here
+#endif
+     
+#if defined(MODULE_PHOTO)                   // Photosensor module
+    #define PHOTOSENSOR_INTERVAL_MS 1000    // update interval
+    #include "PhotoLevel.h"
+    photoModule photoModule1(A0);           // Change sensor pin here
+#endif
+   
+#if defined(MODULE_CURRENT)                 // Current sensor module 
+    #define CURRENT_INTERVAL_MS 1000        // Current sensor update interval
+    #define CURRENT_VOLTAGE_SCALE 3300      // 3.3v max scale
+    #define CURRENT_MV_PER_AMP    66        // 66mV per amp scale (-30A to 30A range)
+    #define CURRENT_MIDDLE_POINT  2500      // analog mV (sensor VCC/2) offset to zero from sensor (tested on proto sensor)
+    #include "Current.h"
+    currentModule currentModule1(A0);       // Change sensor pin here
+#endif 
+
+#if defined(MODULE_MOTION)                  // Motion sensor module setup
+    #define MOTIONSENSOR_INTERVAL_MS 100    // Motion sensor update interval
+    #include "Motion.h"
+    motionModule motionModule1(D2);         // Change sensor pin here
+#endif
+
+#if defined(MODULE_NEOPIXELS)                   // NeoPixels module setup
+    #include <Adafruit_NeoPixel.h>              // NeoPixels library
+    #define NEOPIXELS_NUM 8                     // How many pixels ?
+    #define NEOPIXELS_RAINBOW_INTERVAL_MS 12    // Rainbow loop update interval
+    #define NEOPIXELS_COLOR_ORDER NEO_GRB       // Color order of pixels (NEO_GRB or NEO_RGB)
+    #define NEOPIXELS_FREQUENCY NEO_KHZ800      // NeoPixels PWM frequency (NEO_KHZ400 or NEO_KHZ800)
+    #include "NeoPixels.h"
+    neoPixelsModule neoPixelsModule1(D5);       // Change pin here
+#endif
+    
+#if defined(MODULE_STRIP)                   // RGB Led strip module setup
+    #define STRIP_INTERVAL_MS 12            // RGB Strip loop interval
+    #include <RGBdriver.h>
+    #include "Strip.h"
+    stripModule stripModule1(D7, D6);       // Change strip pins here
+#endif
+
+#if defined(MODULE_TELEINFO_EDF)            // Teleinfo EDF module setup
+    #include <SoftwareSerial.h>             // Software Serial library
+    #include "TeleInfoEDF.h"
+    teleinfoModule teleinfoModule1(14);     // Change pin here
+#endif
+
+#if defined(MODULE_SWITCH_RETROFIT)                     // SwitchRetrofit module setup
+    #define SW_RETRO_INTERVAL_MS 50                     // Main loop interval time
+    #include "SwitchRetrofit.h"
+    switchRetrofitModule switchRetrofitModule1(D0, D1); // Change pins here
+#endif
 
 /**
  * Main setup : setups all chosen modules and options 
  */
 void setup() {
-    Serial.begin(115200);           // Starts serial communication for log and debug purposes
+    Log::setup();
+    Log::Logln("[NFO] Power ON");
+    Log::Logln("[NFO] Serial started");  
     
-    Logln("");
-    Logln("[NFO] Power ON");
-    Logln("[NFO] Serial started");  
-    
-    ReadStoredConfig();             // Read config from EEPROM
-    spiffsSetup();                  // Initialize SPIFFS 
-    
-    #if defined(MODULE_NEOPIXELS)   // NeoPixels module setup
-        neoPixelsSetup();
-    #endif
-    
-    #if defined(MODULE_STRIP)       // RGB Led strip module setup
-        stripSetup();
-    #endif
+    Settings::read();                       // Read config from EEPROM
+    SpiFfs::setup();                        // Initialize SPIFFS 
+    MainWifi::setup();                      // Connects to user wifi
 
-    #if defined(OPTION_MQTT)        // MQTT option setup
-        MQTTsetup();
-    #endif
+    // Main setup of all instantiated options
+    for (Option *o = listOptions; o; o = o->nextOption)
+        o->setup();
     
-    #if defined(MODULE_OUTPUTS)     // Outputs module setup
-        outputSetup();
-    #endif
+    // Main setup of all instantiated modules
+    for (Module *r = listModules; r; r = r->nextModule)
+        r->setup();
+     
+    MainServer::setup();                    // setups the main http endpoints
     
-    #if defined(MODULE_PHOTO)       // Photosensor module setup
-        PhotoSetup();
-    #endif
-    
-    #if defined(MODULE_CURRENT)       // Photosensor module setup
-        currentSetup();
-    #endif
-    
-    #if defined(MODULE_MOTION)       // Motion sensor module setup
-        MotionSetup();
-    #endif
-    
-    #if defined(MODULE_DHT22)       // DHT22 module setup
-        Dht22Setup();
-    #endif
-    
-    #if defined(MODULE_TELEINFO_EDF)  // Teleinfo EDF module setup
-        EDFsetup();
-    #endif
-    
-    #if defined(MODULE_SWITCH_RETROFIT) // SwitchRetrofit module setup
-        switchRetrofitSetup();
-    #endif
-    
-    setupWifi();                // Connects to user wifi
-
-    #if defined(OPTION_AUTO_UPDATE)     
-        checkForAutoUpdate();       // Automatic online update
-    #endif
-    
-    setupConfigFromWifi();      // setups the config web page
-    wifiUpdateSetup();          // setups the firmware update web page
-    
-    server.on("/", httpMainWebPage);    // Brick main app page, built from each module app section
-    server.onNotFound(handleNotFound);  // Handle all other files (from flash) and 404
-    server.begin();                     // Starts the web server to handle all HTTP requests
-    MDNS.addService("http", "tcp", 80);
-    
-    #if defined(OPTION_NTP)     // NTP time sync service setup
-        ntpSetup();     
-    #endif
-
-    Logln("[NFO] Brick started, beginning operations ...");  
-
+    Log::Logln("[NFO] Brick started, beginning operations ...");  
 }
 
 /**
@@ -123,46 +162,14 @@ void setup() {
  */
 void loop() {
   
-  #if defined(OPTION_NTP)       // NTP time sync loop
-    ntpLoop();
-  #endif
-
-  #if defined(MODULE_NEOPIXELS) // NeoPixels module loop
-    neoPixelsLoop();
-  #endif
-  
-  #if defined(MODULE_STRIP)     // RGB Led Strip module loop
-    stripLoop();
-  #endif
-
-  #if defined(OPTION_MQTT)      // MQTT option loop
-    MQTTloop();
-  #endif
-  
-  #if defined(MODULE_PHOTO)     // Photosensor module loop
-    PhotoLoop();
-  #endif
-
-  #if defined(MODULE_CURRENT)       // Photosensor module setup
-    currentLoop();
-  #endif
-
-  #if defined(MODULE_MOTION)       // Motion sensor module loop
-    MotionLoop();
-  #endif
-
-  #if defined(MODULE_DHT22)     // DHT22 module loop
-    Dht22Loop();
-  #endif
-
-  #if defined(MODULE_TELEINFO_EDF)  // Teleinfo EDF module loop
-    EDFloop();
-  #endif
-
-  #if defined(MODULE_SWITCH_RETROFIT) // SwitchRetrofit module loop
-    switchRetrofitLoop();
-  #endif
-
-  server.handleClient();      // Handle all clients connected to server
+    // Main loop of all instantiated options
+    for (Option *o = listOptions; o; o = o->nextOption)
+        o->loop();
+    
+    // Main loop of all instantiated modules
+    for (Module *r = listModules; r; r = r->nextModule)
+        r->loop();
+        
+    MainServer::server.handleClient();      // Handle all clients connected to server
 }
 
