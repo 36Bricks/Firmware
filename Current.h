@@ -41,13 +41,16 @@ class currentModule : public Module {
                 for(int i = 0; i < 100; i++) {              // Reads a hundred times ...
                     currentSum += analogRead(this->pin);    // ... sums all the values ...
                 }                                           // ...
-                this->raw = currentSum / 100.0;             // ... and makes average of value
-                this->mAmps = (((long)this->raw  * CURRENT_VOLTAGE_SCALE / 1024) - CURRENT_MIDDLE_POINT) * 1000 / CURRENT_MV_PER_AMP;
-                
-                #if defined(OPTION_MQTT)
-                    MQTT.publish(topicCurrentRaw,  String(this->raw).c_str());
-                    MQTT.publish(topicCurrentAmps, String(this->mAmps).c_str());
-                #endif
+                int tmp = currentSum / 100.0;             // ... and makes average of value
+                if (tmp != this->raw) {
+                    this->raw = tmp;
+                    this->mAmps = (((long)this->raw  * CURRENT_VOLTAGE_SCALE / 1024) - CURRENT_MIDDLE_POINT) * 1000 / CURRENT_MV_PER_AMP;
+                    
+                    #if defined(OPTION_MQTT)
+                        MQTT.publish(topicCurrentRaw,  String(this->raw).c_str());
+                        MQTT.publish(topicCurrentAmps, String(this->mAmps).c_str());
+                    #endif
+                }
             }
         }
 
