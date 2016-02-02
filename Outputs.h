@@ -43,10 +43,12 @@ class outputModule : public Module {
         */
         void activateOutput1() {
             digitalWrite(this->pin1, HIGH); 
-            this->output1 = true;
-            #if defined(OPTION_MQTT)
-                MQTT.publish(topicOutput1, "1");
-            #endif
+            if (!this->output1) {
+                this->output1 = true;
+                #if defined(OPTION_MQTT)
+                    MQTT.publish(topicOutput1, "1");
+                #endif
+            }
             MainServer::ReturnOK();
         }
 
@@ -55,10 +57,12 @@ class outputModule : public Module {
         */
         void desactivateOutput1() {
             digitalWrite(this->pin1, LOW); 
-            this->output1 = false;
-            #if defined(OPTION_MQTT)
-                MQTT.publish(topicOutput1, "0");
-            #endif
+            if (this->output1) {
+                this->output1 = false;
+                #if defined(OPTION_MQTT)
+                    MQTT.publish(topicOutput1, "0");
+                #endif
+            }
             MainServer::ReturnOK();
         }
         
@@ -67,10 +71,12 @@ class outputModule : public Module {
         */
         void activateOutput2() {
             digitalWrite(this->pin2, HIGH); 
-            this->output2 = true;
-            #if defined(OPTION_MQTT)
-                MQTT.publish(topicOutput2, "1");
-            #endif
+            if (!this->output2) {
+                this->output2 = true;
+                #if defined(OPTION_MQTT)
+                    MQTT.publish(topicOutput2, "1");
+                #endif
+            }
             MainServer::ReturnOK();
         }
         
@@ -79,10 +85,12 @@ class outputModule : public Module {
         */
         void desactivateOutput2() {
             digitalWrite(this->pin2, LOW); 
-            this->output2 = false;
-            #if defined(OPTION_MQTT)
-                MQTT.publish(topicOutput2, "0");
-            #endif
+            if (this->output2) {
+                this->output2 = false;
+                #if defined(OPTION_MQTT)
+                    MQTT.publish(topicOutput2, "0");
+                #endif
+            }
             MainServer::ReturnOK();
         }
         
