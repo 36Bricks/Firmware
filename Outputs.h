@@ -15,8 +15,17 @@ class outputModule : public Module {
         int pin1, pin2;
         bool output1 = false;
         bool output2 = false;
+
+        bool blink1Enabled = false, blink2Enabled = false;
+        long blink1OnDuration  = 0, blink2OnDuration  = 0;
+        long blink1OffDuration = 0, blink2OffDuration = 0;
+        long lastBlink1Switch  = 0, lastBlink2Switch  = 0;
+        
     public:
-        void loop() {}
+        void loop() {
+            blink1Loop();
+            blink2Loop();
+        }
         
         outputModule(int pin1, int pin2) {
             this->pin1 = pin1;
@@ -33,8 +42,10 @@ class outputModule : public Module {
             
             MainServer::server.on("/out/0/on", (std::bind(&outputModule::activateOutput1, this)));
             MainServer::server.on("/out/0/off", (std::bind(&outputModule::desactivateOutput1, this)));
+            MainServer::server.on("/out/0/blink", (std::bind(&outputModule::blink1API, this)));
             MainServer::server.on("/out/1/on", (std::bind(&outputModule::activateOutput2, this)));
             MainServer::server.on("/out/1/off", (std::bind(&outputModule::desactivateOutput2, this)));
+            MainServer::server.on("/out/1/blink", (std::bind(&outputModule::blink2API, this)));
             MainServer::server.on("/out/status", (std::bind(&outputModule::statusAPI, this)));
         }
 
@@ -111,6 +122,84 @@ class outputModule : public Module {
         String mainWebPage(String actualPage) {
             actualPage.replace("<!-- %%APP_ZONE%% -->", SpiFfs::readFile("/app_outputs.html"));    
             return actualPage;
+        }
+
+        /***
+        * Blink output 1 loop
+        */
+        void blink1Loop() {
+            if (!this->blink1Enabled) return;
+            
+            long testDuration = 0;
+            if (this->output1) testDuration = this->blink1OnDuration;
+            else testDuration = this->blink1OffDuration;
+
+            if (millis() - this->lastBlink1Switch > testDuration) {
+                this->lastBlink1Switch = millis();
+                if (this->output1) {
+                    Log::Logln("[NFO] Output 1 blink OFF");
+                    desactivateOutput1();
+                } else {
+                    Log::Logln("[NFO] Output 1 blink ON");
+                    activateOutput1();
+                }
+            }
+        }
+
+        /***
+        * Blink output 2 loop
+        */
+        void blink2Loop() {
+            if (!this->blink2Enabled) return;
+            
+            long testDuration = 0;
+            if (this->output2) testDuration = this->blink2OnDuration;
+            else testDuration = this->blink2OffDuration;
+
+            if (millis() - this->lastBlink2Switch > testDuration) {
+                this->lastBlink2Switch = millis();
+                if (this->output2) {
+                    Log::Logln("[NFO] Output 2 blink OFF");
+                    desactivateOutput2();
+                } else {
+                    Log::Logln("[NFO] Output 2 blink ON");
+                    activateOutput2();
+                }
+            }
+        }
+
+        /***
+        * HTTP JSON API to blink output 1
+        */
+        void blink1API() {
+            this->blink1OnDuration  = MainServer::server.arg("on").toInt();  // Parse on duration
+            this->blink1OffDuration = MainServer::server.arg("off").toInt(); // Parse off duration
+            if ((this->blink1OnDuration==0) || (this->blink1OffDuration==0)) {
+                Log::Logln("[NFO] Output 1 blink mode stopped");
+                this->blink1Enabled = false;
+            } else {
+                Log::Logln("[NFO] Output 1 blink mode started : " + String(this->blink1OnDuration) + " / " + String(this->blink1OffDuration));
+               this->blink1Enabled = true;
+               this->lastBlink1Switch = millis();
+            }
+            MainServer::ReturnOK();
+        }
+
+        /***
+        * HTTP JSON API to blink output 2
+        */
+        void blink2API() {
+            this->blink2OnDuration  = MainServer::server.arg("on").toInt();  // Parse on duration
+            this->blink2OffDuration = MainServer::server.arg("off").toInt(); // Parse off duration
+            if ((this->blink2OnDuration==0) || (this->blink2OffDuration==0)) {
+                Log::Logln("[NFO] Output 2 blink mode stopped");
+                this->blink2Enabled = false;
+            } else {
+                Log::Logln("[NFO] Output 2 blink mode started : " + String(this->blink2OnDuration) + " / " + String(this->blink2OffDuration));
+               this->blink2Enabled = true;
+               this->lastBlink2Switch = millis();
+            }
+            MainServer::ReturnOK();
         }
 
 };

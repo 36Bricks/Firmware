@@ -6,7 +6,7 @@
 #define MODULE_OUTPUTS
 //#define MODULE_TELEINFO_EDF
 //#define MODULE_PHOTO
-#define MODULE_DHT22
+//#define MODULE_DHT22
 //#define MODULE_NEOPIXELS
 //#define MODULE_STRIP
 //#define MODULE_SWITCH_RETROFIT
@@ -25,7 +25,7 @@
 //#define BRICK_TYPE "DualPlug"
 //#define BRICK_TYPE "Muscle"
 
-#define FIRMWARE_VERSION "36Brick Firmware v0.39.0"
+#define FIRMWARE_VERSION "36Brick Firmware v0.40.0"
 
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
