@@ -123,10 +123,13 @@ class teleinfoModule : public Module {
                 for (int i=0; i<NBCOMMANDS; i++) { // On la compare à toutes les commandes
                     if (data.substring(0, this->commands[i].length()) == this->commands[i]) { // Si elle correspond à une commande
                         Log::Logln("[EVT] EDF Serial : "+ String(data));
-                        this->values[i] = data.substring((this->commands[iCommandFound].length() + 1),(this->lengths[iCommandFound] + (this->commands[iCommandFound].length() + 1)));
-                        #if defined(OPTION_MQTT)
-                            MQTT.publish(String(topicEDF) + String(this->commands[i]), String(this->values[i]).c_str());
-                        #endif
+                        int tmp = data.substring((this->commands[iCommandFound].length() + 1),(this->lengths[iCommandFound] + (this->commands[iCommandFound].length() + 1)));
+                        if (tmp != this->values[i]) {
+                            this->values[i] = tmp;
+                            #if defined(OPTION_MQTT)
+                                MQTT.publish(String(topicEDF) + String(this->commands[i]), String(this->values[i]).c_str());
+                            #endif
+                        }
                         break;
                     }
                 }
