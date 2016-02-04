@@ -27,7 +27,7 @@
 //#define BRICK_TYPE "DualPlug"
 //#define BRICK_TYPE "Muscle"
 
-#define FIRMWARE_VERSION "36Brick Firmware v0.40.0"
+#define FIRMWARE_VERSION "36Brick Firmware v0.41.0"
 
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
