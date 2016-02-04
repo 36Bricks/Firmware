@@ -2,7 +2,6 @@
  * Main HTTP server
  */
  
-// TODO : Add a switch to enable/disable MQTT option
 // TODO : Add NTP and timezone configuration to brick config
 
 #define HTTP_API_PORT 80
@@ -15,7 +14,6 @@ namespace MainServer {
     * Brick main web page, builds a page with a section for each enabled module
     */
     void httpMainWebPage() {
-        
         String HTMLoutput = SpiFfs::readFile("/header.html") + SpiFfs::readFile("/app.html");      
         HTMLoutput.replace("%%TYPE%%",BRICK_TYPE);              // Replace brick type in template
         
@@ -23,8 +21,6 @@ namespace MainServer {
             HTMLoutput = r->mainWebPage(HTMLoutput);
 
         long tBefore = millis();
-        MainServer::server.sendHeader("Content-Length", String(HTMLoutput.length()));
-        MainServer::server.send(200, "text/html", "");
         MainServer::server.sendContent(HTMLoutput.c_str());
         Log::Logln("[NFO] Served Main Web Page " + String(HTMLoutput.length()) + "b in " + String(millis()-tBefore) + "ms");
     }
@@ -73,8 +69,6 @@ namespace MainServer {
         #endif
 
         long tBefore = millis();
-        MainServer::server.sendHeader("Content-Length", String(SetupPage.length()));
-        MainServer::server.send(200, "text/html", "");
         MainServer::server.sendContent(SetupPage.c_str());
         Log::Logln("[NFO] Served Setup page " + String(SetupPage.length()) + "b in " + String(millis()-tBefore) + "ms");
     }
@@ -109,8 +103,6 @@ namespace MainServer {
         #endif  
       
         long tBefore = millis();
-        MainServer::server.sendHeader("Content-Length", String(HTMLoutput.length()));
-        MainServer::server.send(200, "text/html", "");
         MainServer::server.sendContent(HTMLoutput.c_str());
         Log::Logln("[NFO] Served Settings saved page " + String(HTMLoutput.length()) + "b in " + String(millis()-tBefore) + "ms");
     }
@@ -221,8 +213,6 @@ namespace MainServer {
             firmPage.replace("%%VERSION%%",firmVersion); // Replace firmware version in template
 
             long tBefore = millis();
-            MainServer::server.sendHeader("Content-Length", String(firmPage.length()));
-            MainServer::server.send(200, "text/html", "");
             MainServer::server.sendContent(firmPage.c_str());
             Log::Logln("[NFO] Served Firmware update page " + String(firmPage.length()) + "b in " + String(millis()-tBefore) + "ms");
        });
