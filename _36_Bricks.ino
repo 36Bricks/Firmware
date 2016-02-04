@@ -29,15 +29,11 @@
 
 #define FIRMWARE_VERSION "36Brick Firmware v0.40.0"
 
-
-#define DEBUG_ESP_HTTP_CLIENT
-#define DEBUG_ESP_PORT Serial
-
-
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include <EEPROM.h>
+ADC_MODE(ADC_VCC);
 
 #include "Globals.h"
 #include "Settings.h"

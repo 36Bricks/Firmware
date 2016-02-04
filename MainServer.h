@@ -74,6 +74,96 @@ namespace MainServer {
     }
     
     /**
+    * Serve the status page
+    */
+    void BrickStatusPage() {
+        Log::Logln("[NFO] Serving Status page ...");
+        String StatusPage = SpiFfs::readFile("/header.html") + SpiFfs::readFile("/status.html");      // Status page template
+
+        StatusPage.replace("%%TYPE%%",BRICK_TYPE);              // Replace brick type in template
+        
+        // Hardware
+        StatusPage.replace("%%ESP_VCC%%", String(ESP.getVcc()/1000.0));
+        StatusPage.replace("%%ESP_CHIP_ID%%", String(ESP.getChipId(), 16));
+        StatusPage.replace("%%ESP_CPU_FREQ%%", String(ESP.getCpuFreqMHz()));
+
+        // Memory
+        StatusPage.replace("%%ESP_FLASH_CHIP_ID%%", String(ESP.getFlashChipId(), 16));
+        StatusPage.replace("%%ESP_FLASH_CHIP_SIZE%%", String(ESP.getFlashChipSize()/1024/1024));
+        StatusPage.replace("%%ESP_FLASH_CHIP_REAL_SIZE%%", String(ESP.getFlashChipRealSize()/1024/1024));
+        StatusPage.replace("%%ESP_FLASH_CHIP_SPEED%%", String(ESP.getFlashChipSpeed()/1000/1000));
+        StatusPage.replace("%%ESP_FLASH_CHIP_MODE%%", String(
+            ((ESP.getFlashChipMode()==0)?"QIO":
+            ((ESP.getFlashChipMode()==1)?"QOUT":
+            ((ESP.getFlashChipMode()==2)?"DIO":
+            ((ESP.getFlashChipMode()==3)?"DOUT":"UNKNOWN"))))
+            ));
+        StatusPage.replace("%%ESP_FREE_HEAP%%", String(ESP.getFreeHeap()/1024.0));
+        StatusPage.replace("%%ESP_SKETCH_SIZE%%", String(ESP.getSketchSize()/1024));
+        StatusPage.replace("%%ESP_FREE_SKETCH_SPACE%%", String(ESP.getFreeSketchSpace()/1024));
+        FSInfo info;
+        SPIFFS.info(info);
+        StatusPage.replace("%%ESP_SPIFFS_USED%%", String(info.usedBytes/1024));
+        StatusPage.replace("%%ESP_SPIFFS_FREE%%", String(info.totalBytes/1024));
+
+        // Firmware
+        StatusPage.replace("%%ESP_FIRM_VERSION%%", String(FIRMWARE_VERSION));
+        StatusPage.replace("%%ESP_SDK_VERSION%%", String(ESP.getSdkVersion()));
+        StatusPage.replace("%%ESP_BOOT_VERSION%%", String(ESP.getBootVersion()));
+        StatusPage.replace("%%ESP_BOOT_MODE%%", String(ESP.getBootMode()));
+        StatusPage.replace("%%ESP_RESET_REASON%%", String(ESP.getResetReason()));
+        StatusPage.replace("%%ESP_RESET_INFO%%", String(ESP.getResetInfo()));
+        StatusPage.replace("%%ESP_CYCLE_COUNT%%", String(ESP.getCycleCount()));
+
+        char upTime[32] = { 0 };
+        unsigned long milli = millis();
+        unsigned long secs=milli/1000, mins=secs/60;
+        unsigned int hours=mins/60, days=hours/24;
+        secs-=mins*60;
+        mins-=hours*60;
+        hours-=days*24;
+        sprintf(upTime,"%d days %d:%d:%d", (byte)days, (byte)hours, (byte)mins, (byte)secs);
+        StatusPage.replace("%%ESP_UPTIME%%", String(upTime));
+        StatusPage.replace("%%ESP_UPTIME%%", String(ESP.getCycleCount()));
+        
+        // WiFi
+        int n = WiFi.scanNetworks();        // Scans networks
+        String ssid;
+        int32_t rssi;
+        uint8_t sec;
+        uint8_t* bssid;
+        int32_t chan;
+        bool hidden;
+        for (int i = 0; i < n; ++i) {
+            if (!strcmp(WiFi.SSID(i).c_str(), Settings::retreivedSSID.ssid)) {
+                WiFi.getNetworkInfo(i, ssid, sec, rssi, bssid, chan, hidden);
+                break;
+            }
+        }
+        
+        StatusPage.replace("%%ESP_WIFI_SSID%%", ssid);
+        StatusPage.replace("%%ESP_WIFI_ENCRYPTION_TYPE%%", String(
+            ((sec==ENC_TYPE_NONE)?"NONE":
+            ((sec==ENC_TYPE_WEP)?"WEP":
+            ((sec==ENC_TYPE_TKIP)?"WPA PSK TKIP":
+            ((sec==ENC_TYPE_CCMP)?"WPA2 PSK CCMP":
+            ((sec==ENC_TYPE_AUTO)?"WPA/WPA2 PSK AUTO":"UNKNOWN")))))
+            ));
+        StatusPage.replace("%%ESP_WIFI_RSSI%%", String(rssi));
+        
+        char macStr[18] = { 0 };
+        sprintf(macStr, "%02X:%02X:%02X:%02X:%02X:%02X", bssid[0], bssid[1], bssid[2], bssid[3], bssid[4], bssid[5]);
+        StatusPage.replace("%%ESP_WIFI_BSSID%%", String(macStr));
+        StatusPage.replace("%%ESP_WIFI_CHANNEL%%", String(chan));
+        StatusPage.replace("%%ESP_IP_ADDRESS%%", WiFi.localIP().toString());
+        StatusPage.replace("%%ESP_MAC_ADDRESS%%", WiFi.macAddress());
+
+        long tBefore = millis();
+        MainServer::server.sendContent(StatusPage.c_str());
+        Log::Logln("[NFO] Served Status page " + String(StatusPage.length()) + "b in " + String(millis()-tBefore) + "ms");
+    }
+    
+    /**
      * Setup page Form destination : saves the config
      */
     void SaveWifiSetup() {
@@ -173,8 +263,8 @@ namespace MainServer {
         }
         message += "\n";
         message += "FreeHeap.....: " + String(ESP.getFreeHeap()) + "\n";
-        message += "ChipID.......: " + String(ESP.getChipId()) + "\n";
-        message += "FlashChipId..: " + String(ESP.getFlashChipId()) + "\n";
+        message += "ChipID.......: " + String(ESP.getChipId(), 16) + "\n";
+        message += "FlashChipId..: " + String(ESP.getFlashChipId(), 16) + "\n";
         message += "FlashChipSize: " + String(ESP.getFlashChipSize()) + " bytes\n";
         message += "getCycleCount: " + String(ESP.getCycleCount()) + " Cycles\n";
         message += "UpTime.......: " + String(millis()/1000) + " Seconds\n";
@@ -185,13 +275,14 @@ namespace MainServer {
      * main web server setup : declare HTTP API endpoints
      */
     void setup() {
-        server.on("/", MainServer::httpMainWebPage);    // Brick main app page, built from each module app section
+        server.on("/", MainServer::httpMainWebPage);            // Brick main app page, built from each module app section
         server.on("/setup", MainServer::WifiSetupPage);         // Setup web page
-        server.on("/saveCFG", MainServer::SaveWifiSetup);                   // Setup form destination
+        server.on("/saveCFG", MainServer::SaveWifiSetup);       // Setup form destination
         server.on("/reset", []() {                              // Resets the brick
             MainServer::server.send( 200, "text/plain", "Resetting..." );
             ESP.restart();
         });
+        server.on("/status", MainServer::BrickStatusPage);      // Status web page
         
         server.on("/isBrick", []() {                            // To know if this is a brick, used by Android app brick discovery
             String JSONoutput = "";
