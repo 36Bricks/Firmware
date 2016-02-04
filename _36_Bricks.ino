@@ -14,6 +14,8 @@
 //#define MODULE_CURRENT
 
 #define OPTION_AUTO_UPDATE
+#define OPTION_SSDP
+#define OPTION_DISCOVERY
 #define OPTION_MQTT
 #define OPTION_NTP
 
@@ -26,6 +28,11 @@
 //#define BRICK_TYPE "Muscle"
 
 #define FIRMWARE_VERSION "36Brick Firmware v0.40.0"
+
+
+#define DEBUG_ESP_HTTP_CLIENT
+#define DEBUG_ESP_PORT Serial
+
 
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
@@ -67,6 +74,18 @@
     #define AUTO_UPDATE_URL  "http://192.168.2.8/bricks/update.php" // Update server url
     #include "AutoUpdate.h"
     autoUpdateOption autoUpdate;
+#endif
+
+#if defined(OPTION_DISCOVERY)               // Discovery option
+    #include <ESP8266Ping.h>                // Ping library
+    #include "Discovery.h"
+    discoveryOption discovery;
+#endif
+
+#if defined(OPTION_SSDP)                    // SSDP option
+    #include <ESP8266SSDP.h>
+    #include "SSDP.h"
+    ssdpOption SSPD;
 #endif
 
 #if defined(MODULE_OUTPUTS)                 // Outputs module
@@ -136,8 +155,9 @@
  * Main setup : setups all chosen modules and options 
  */
 void setup() {
+    ping_option a;
     Log::setup();
-    Log::Logln("[NFO] Power ON");
+    Log::Logln("[NFO] Power ON - " + String(FIRMWARE_VERSION));
     Log::Logln("[NFO] Serial started");  
     
     Settings::read();                       // Read config from EEPROM
