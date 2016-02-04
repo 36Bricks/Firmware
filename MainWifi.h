@@ -36,8 +36,7 @@ namespace MainWifi {
         
         delay(2000);                              // Waits AP to fully start
         yield();
-        Serial.print("[NFO] Brick IP : ");
-        Serial.println(WiFi.softAPIP());
+        Log::Logln("[NFO] Brick IP : " + WiFi.softAPIP().toString());
     }
     
     /**
@@ -45,7 +44,6 @@ namespace MainWifi {
     */
     void setup() {
         WiFi.mode(WIFI_STA);
-        MDNS.begin(HOST);
         if (Settings::ssidOK && Settings::passOK) {
             MainWifi::ok = true;
             Log::Logln("[NFO] Connecting WIFI to " + String(Settings::retreivedSSID.ssid) + " / " + String(Settings::retreivedPASS.pass));
@@ -62,13 +60,18 @@ namespace MainWifi {
             }
         
             if (MainWifi::ok) {
+                MDNS.begin(HOST);
                 Log::Logln("[NFO] WiFi connected ! ");
                 Log::Logln("[NFO] IP : " + WiFi.localIP().toString());
+                Log::Logln("[NFO] HOSTNAME : " + String(HOST));
                 Log::Logln("[NFO] HTTP Server started");
             } else {
                 Log::Logln("[ERR] WiFi not connected, starting AP !");
                 MainWifi::setupAP(); 
             }
+        } else {
+            Log::Logln("[ERR] WiFi settings not set, starting standalone AP !");
+            MainWifi::setupAP(); 
         }
     }
     
