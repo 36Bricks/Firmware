@@ -44,6 +44,8 @@ namespace MainWifi {
     */
     void setup() {
         WiFi.mode(WIFI_STA);
+        MDNS.begin(HOST);
+        wifi_station_set_hostname(HOST);
         if (Settings::ssidOK && Settings::passOK) {
             MainWifi::ok = true;
             Log::Logln("[NFO] Connecting WIFI to " + String(Settings::retreivedSSID.ssid) + " / " + String(Settings::retreivedPASS.pass));
@@ -60,7 +62,6 @@ namespace MainWifi {
             }
         
             if (MainWifi::ok) {
-                MDNS.begin(HOST);
                 Log::Logln("[NFO] WiFi connected ! ");
                 Log::Logln("[NFO] IP : " + WiFi.localIP().toString());
                 Log::Logln("[NFO] HOSTNAME : " + String(HOST));

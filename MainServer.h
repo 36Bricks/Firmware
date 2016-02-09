@@ -14,15 +14,15 @@ namespace MainServer {
     * Brick main web page, builds a page with a section for each enabled module
     */
     void httpMainWebPage() {
-        String HTMLoutput = SpiFfs::readFile("/header.html") + SpiFfs::readFile("/app.html");      
+        String HTMLoutput = SpiFfs::readFile("/header.html") + SpiFfs::readFile("/app.html");   
         HTMLoutput.replace("%%TYPE%%",BRICK_TYPE);              // Replace brick type in template
         
         for (Module *r = listModules; r; r = r->nextModule)     // main web page section of all instantiated modules
             HTMLoutput = r->mainWebPage(HTMLoutput);
-
+        
         long tBefore = millis();
         MainServer::server.sendContent(HTMLoutput.c_str());
-        Log::Logln("[NFO] Served Main Web Page " + String(HTMLoutput.length()) + "b in " + String(millis()-tBefore) + "ms");
+        Log::Logln("[NFO] Served Main Web Page " + String(HTMLoutput.length()) + "B in " + String(millis()-tBefore) + "ms");
     }
     
     /***
@@ -30,6 +30,13 @@ namespace MainServer {
      */
     void ReturnOK() {
         MainServer::server.send(200, "application/json", "{ \"ret\": \"OK\" }\r\n");
+    }
+    
+    /***
+     * JSON KO answer
+     */
+    void ReturnKO(String err) {
+        MainServer::server.send(200, "application/json", "{ \"ret\": \"KO\" , \"err\" : \""+err+"\"}\r\n");
     }
     
     /**
@@ -70,7 +77,7 @@ namespace MainServer {
 
         long tBefore = millis();
         MainServer::server.sendContent(SetupPage.c_str());
-        Log::Logln("[NFO] Served Setup page " + String(SetupPage.length()) + "b in " + String(millis()-tBefore) + "ms");
+        Log::Logln("[NFO] Served Setup page " + String(SetupPage.length()) + "B in " + String(millis()-tBefore) + "ms");
     }
     
     /**
@@ -160,7 +167,7 @@ namespace MainServer {
 
         long tBefore = millis();
         MainServer::server.sendContent(StatusPage.c_str());
-        Log::Logln("[NFO] Served Status page " + String(StatusPage.length()) + "b in " + String(millis()-tBefore) + "ms");
+        Log::Logln("[NFO] Served Status page " + String(StatusPage.length()) + "B in " + String(millis()-tBefore) + "ms");
     }
     
     /**
@@ -194,7 +201,7 @@ namespace MainServer {
       
         long tBefore = millis();
         MainServer::server.sendContent(HTMLoutput.c_str());
-        Log::Logln("[NFO] Served Settings saved page " + String(HTMLoutput.length()) + "b in " + String(millis()-tBefore) + "ms");
+        Log::Logln("[NFO] Served Settings saved page " + String(HTMLoutput.length()) + "B in " + String(millis()-tBefore) + "ms");
     }
      
     /***
@@ -238,7 +245,7 @@ namespace MainServer {
         }
         
         in.close();
-        Log::Logln("[NFO] Served " + String(path) + " from SPIFFS " + String(len) + "b in " + String(millis()-tBefore) + "ms");
+        Log::Logln("[NFO] Served " + String(path) + " from SPIFFS " + String(len) + "B in " + String(millis()-tBefore) + "ms");
         return true;
     }
 
@@ -284,18 +291,6 @@ namespace MainServer {
         });
         server.on("/status", MainServer::BrickStatusPage);      // Status web page
         
-        server.on("/isBrick", []() {                            // To know if this is a brick, used by Android app brick discovery
-            String JSONoutput = "";
-            JSONoutput += "{ \"brickType\": \"";
-            JSONoutput += BRICK_TYPE;
-            JSONoutput += "\", \"brickName\": \"";
-            JSONoutput += String(Settings::retreivedName.name);
-            JSONoutput += "\", \"brickVersion\": \"";
-            JSONoutput += FIRMWARE_VERSION;
-            JSONoutput += "\" }\r\n";
-            MainServer::server.send(200, "application/json", JSONoutput);
-        });
-      
         server.on("/firmware", HTTP_GET, [](){                  // Firmware update web page
             server.sendHeader("Connection", "close");
             server.sendHeader("Access-Control-Allow-Origin", "*");
@@ -305,7 +300,7 @@ namespace MainServer {
 
             long tBefore = millis();
             MainServer::server.sendContent(firmPage.c_str());
-            Log::Logln("[NFO] Served Firmware update page " + String(firmPage.length()) + "b in " + String(millis()-tBefore) + "ms");
+            Log::Logln("[NFO] Served Firmware update page " + String(firmPage.length()) + "B in " + String(millis()-tBefore) + "ms");
        });
         
         // Firmware update file upload (form destination)

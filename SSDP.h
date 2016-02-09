@@ -13,7 +13,7 @@ class ssdpOption : public Option {
             Log::Logln("[NFO] SSDP initialization");
 
             MainServer::server.on("/description.xml", HTTP_GET, [](){
-                Log::Logln("[EVT] SSDP request");
+                Log::Logln("[EVT] SSDP request from " + MainServer::server.client().remoteIP().toString());
                 SSDP.schema(MainServer::server.client());
             });
     

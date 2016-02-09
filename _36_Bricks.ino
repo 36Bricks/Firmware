@@ -20,19 +20,23 @@
 #define OPTION_NTP
 
 //-----------------------------------------------------------
-//-- Select one of the following module types              --
+//-- Select one of the following brick types              --
 //-----------------------------------------------------------
 #define BRICK_TYPE "MultiSensor"
 //#define BRICK_TYPE "Plug"
 //#define BRICK_TYPE "DualPlug"
 //#define BRICK_TYPE "Muscle"
 
-#define FIRMWARE_VERSION "36Brick Firmware v0.41.0"
+#define FIRMWARE_VERSION "36Brick Firmware v0.42.0"
 
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include <EEPROM.h>
+#include <ArduinoJson.h>
+extern "C" {
+    #include "user_interface.h"
+}
 ADC_MODE(ADC_VCC);
 
 #include "Globals.h"
