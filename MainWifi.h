@@ -50,6 +50,7 @@ namespace MainWifi {
             MainWifi::ok = true;
             Log::Logln("[NFO] Connecting WIFI to " + String(Settings::retreivedSSID.ssid) + " / " + String(Settings::retreivedPASS.pass));
         
+            WiFi.setSleepMode(WIFI_NONE_SLEEP);
             WiFi.begin(Settings::retreivedSSID.ssid, Settings::retreivedPASS.pass);
             int nbRetries = 0;
             while (WiFi.status() != WL_CONNECTED) {

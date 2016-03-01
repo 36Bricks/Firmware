@@ -63,7 +63,7 @@ class discoveryOption : public Option {
             if (MainWifi::ok) {
                 String ourIP = WiFi.localIP().toString();
                 this->subNet = ourIP.substring(0, ourIP.lastIndexOf('.'));
-                Log::Logln("[NFO] Discovery initialization on subnet " + this->subNet + "."+String(DICOVERY_SUBNET_START)+"->"+String(DICOVERY_SUBNET_END));
+                Log::Logln("[NFO] Discovery on subnet " + this->subNet + "."+String(DICOVERY_SUBNET_START)+"->"+String(DICOVERY_SUBNET_END));
                 this->readyToScan = true;
                 MainServer::server.on("/isBrick", (std::bind(&discoveryOption::isBrickAPI, this)));    // To know if this is a brick, used by Android app and brick discovery
             }

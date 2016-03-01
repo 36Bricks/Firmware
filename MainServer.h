@@ -15,10 +15,13 @@ namespace MainServer {
     */
     void httpMainWebPage() {
         String HTMLoutput = SpiFfs::readFile("/header.html") + SpiFfs::readFile("/app.html");   
+        Log::Logln("[NFO] Preparing Main Web Page template : " + String(HTMLoutput.length()) + "B");
         HTMLoutput.replace("%%TYPE%%",BRICK_TYPE);              // Replace brick type in template
         
-        for (Module *r = listModules; r; r = r->nextModule)     // main web page section of all instantiated modules
+        for (Module *r = listModules; r; r = r->nextModule) {     // main web page section of all instantiated modules
             HTMLoutput = r->mainWebPage(HTMLoutput);
+            Log::Logln("[NFO] Main Web Page : " + String(HTMLoutput.length()) + "B");
+        }
         
         long tBefore = millis();
         MainServer::server.sendContent(HTMLoutput.c_str());

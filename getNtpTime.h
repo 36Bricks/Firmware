@@ -23,7 +23,7 @@ unsigned long sendNTPpacket(IPAddress& address) {
 * NTP Sync provider
 */
 time_t getNtpTime() {
-    Log::Logln("[NFO] NTP sync time ...");
+    Log::Logln("[EVT] NTP sync time ...");
     while (NTP.udp.parsePacket() > 0) ;                   // discard any previously received packets
     WiFi.hostByName(NTP_SERVER_NAME, NTP.timeServerIP);       // get a server from the pool
     sendNTPpacket(NTP.timeServerIP);                          // send an NTP packet to the time server

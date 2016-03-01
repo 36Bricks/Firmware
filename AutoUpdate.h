@@ -5,6 +5,9 @@
 */
 // TODO : Add an auto-update on an every-day basis
 
+#include <ESP8266HTTPClient.h>
+#include <ESP8266httpUpdate.h>
+
 class autoUpdateOption : public Option {
     private:
                 
@@ -13,7 +16,7 @@ class autoUpdateOption : public Option {
 
         void setup() {
             if (MainWifi::ok) {
-                Log::Logln("[NFO] Strarting auto update for SPIFFS, please wait ...");
+                Log::Logln("[NFO] Auto update for SPIFFS, please wait ...");
                 switch(ESPhttpUpdate.updateSpiffs(AUTO_UPDATE_URL, FIRMWARE_VERSION)) {
                     case HTTP_UPDATE_FAILED:
                         Log::Logln("[NFO] Auto update failed : " + String(ESPhttpUpdate.getLastErrorString().c_str()));
@@ -28,7 +31,7 @@ class autoUpdateOption : public Option {
                         break;
                 }
                 
-                Log::Logln("[NFO] Strarting auto update for Flash, will reboot if needed ! ");
+                Log::Logln("[NFO] Auto update for Flash, please wait ...");
                 switch(ESPhttpUpdate.update(AUTO_UPDATE_URL, FIRMWARE_VERSION)) {
                     case HTTP_UPDATE_FAILED:
                         Log::Logln("[NFO] Auto update failed : " + String(ESPhttpUpdate.getLastErrorString().c_str()));
