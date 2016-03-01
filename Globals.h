@@ -2,7 +2,7 @@
  * Globals definitions
  */
 
-String TheTime = "BOOT-TIME";     // Local time for logs
+String TheTime = "BOOT";     // Local time for logs
 
 /**
  * float to char*, with precision
@@ -19,7 +19,9 @@ char *ftoa(char *a, double f, int precision) {
     itoa(desimal, a, 10);
     return ret;
 }
-
+#if defined(MODULE_ILI9341)
+    void addLogLineToScreen(String);
+#endif
 
 /**
  * Custom log function to print to serial and OLED screen if enable
@@ -27,6 +29,9 @@ char *ftoa(char *a, double f, int precision) {
 namespace Log {
     void Logln(String line) {
         Serial.println("["+TheTime+"]"+line);
+        #if defined(MODULE_ILI9341)
+            addLogLineToScreen("["+TheTime+"]"+line);
+        #endif
     }
     void setup() {
         Serial.begin(115200);  // Starts serial communication for log and debug purposes

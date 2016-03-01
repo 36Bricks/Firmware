@@ -3,15 +3,16 @@
 //-----------------------------------------------------------
 //-- Enable or disable some modules and option             --
 //-----------------------------------------------------------
-#define MODULE_OUTPUTS
+//#define MODULE_OUTPUTS
 //#define MODULE_TELEINFO_EDF
 //#define MODULE_PHOTO
 //#define MODULE_DHT22
 //#define MODULE_NEOPIXELS
-//#define MODULE_STRIP
+#define MODULE_STRIP
 //#define MODULE_SWITCH_RETROFIT
 //#define MODULE_MOTION
 //#define MODULE_CURRENT
+//#define MODULE_ILI9341
 
 #define OPTION_AUTO_UPDATE
 #define OPTION_SSDP
@@ -140,9 +141,8 @@ ADC_MODE(ADC_VCC);
 #endif
 
 #if defined(MODULE_TELEINFO_EDF)            // Teleinfo EDF module setup
-    #include <SoftwareSerial.h>             // Software Serial library
     #include "TeleInfoEDF.h"
-    teleinfoModule teleinfoModule1(14);     // Change pin here
+    teleinfoModule teleinfoModule1(D5);     // Change pin here
 #endif
 
 #if defined(MODULE_SWITCH_RETROFIT)                     // SwitchRetrofit module setup
@@ -150,12 +150,28 @@ ADC_MODE(ADC_VCC);
     #include "SwitchRetrofit.h"
     switchRetrofitModule switchRetrofitModule1(D0, D1); // Change pins here
 #endif
+     
+#if defined(MODULE_ILI9341)                 // ILI9341 module
+    #include "SPI.h"
+    #include "Adafruit_GFX.h"
+    #include "Adafruit_ILI9341.h"
+    #define ILI9341_INTERVAL_MS 1000
+    #define ILI9341_NB_LOG 28
+    #include "ILI9341.h"
+    ili9341Module ili9341Module1(2, 5);     // Change tft pins here
+    void addLogLineToScreen(String line) {
+        ili9341Module1.addLogLine(line);
+    }
+#endif
 
 /**
  * Main setup : setups all chosen modules and options 
  */
 void setup() {
-    ping_option a;
+
+    #if defined(MODULE_ILI9341)
+        ili9341Module1.earlySetup();
+    #endif
     Log::setup();
     Log::Logln("[NFO] Power ON - " + String(FIRMWARE_VERSION));
     Log::Logln("[NFO] Serial started");  
