@@ -67,4 +67,12 @@ class motionModule : public Module {
             JSONoutput += "\" }\r\n";
             MainServer::server.send(200, "application/json", JSONoutput);
         }
+
+        /***
+        * App section for brick main web page
+        */
+        // TODO
+        String mainWebPage(String actualPage) {
+            return actualPage;
+        }
 };

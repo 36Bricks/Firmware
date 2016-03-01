@@ -36,7 +36,7 @@ class photoModule : public Module {
 
                 int tmp = analogRead(this->pin);
                 if (tmp != this->level) {
-                    this->level = tmp
+                    this->level = tmp;
                     #if defined(OPTION_MQTT)
                         MQTT.publish(topicLight, String(this->level).c_str());
                     #endif
@@ -44,7 +44,7 @@ class photoModule : public Module {
 
                 tmp = constrain(map(this->level, 0, 1024, 0, 100), 0, 100);
                 if (tmp != this->levelPrc) {
-                    this->levelPrc = tmp
+                    this->levelPrc = tmp;
                     #if defined(OPTION_MQTT)
                         MQTT.publish(topicLightPrc, String(this->levelPrc).c_str());
                     #endif
@@ -63,5 +63,13 @@ class photoModule : public Module {
             JSONoutput += this->levelPrc;
             JSONoutput += "\" }\r\n";
             MainServer::server.send(200, "application/json", JSONoutput);
+        }
+
+        /***
+        * App section for brick main web page
+        */
+        // TODO
+        String mainWebPage(String actualPage) {
+            return actualPage;
         }
 };
